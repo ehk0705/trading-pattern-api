@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pine Editor - Trading Station v2.0</title>
+
+    <style>
+        :root {
+            --fond: #07111f;
+            --carte: #0d1b2f;
+            --cyan: #22d3ee;
+            --jaune: #facc15;
+            --texte: #f8fafc;
+            --texte-secondaire: #cbd5e1;
+            --bordure: rgba(255, 255, 255, 0.14);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: radial-gradient(circle at top, #102a48 0, var(--fond) 45%, #020617 100%);
+            color: var(--texte);
+        }
+
+        header {
+            padding: 14px;
+            background: rgba(2, 6, 23, 0.92);
+            border-bottom: 1px solid var(--bordure);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .top-bar {
+            max-width: 1200px;
+            margin: auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: 900;
+            color: var(--cyan);
+        }
+
+        .logo span {
+            color: var(--jaune);
+            font-size: 14px;
+        }
+
+        nav {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        nav a {
+            color: var(--texte);
+            text-decoration: none;
+            padding: 8px 12px;
+            border-radius: 999px;
+            border: 1px solid var(--bordure);
+            background: rgba(255, 255, 255, 0.05);
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        nav a:hover,
+        nav a.active {
+            background: var(--cyan);
+            color: #020617;
+        }
+
+        main {
+            max-width: 1200px;
+            margin: auto;
+            padding: 18px;
+        }
+
+        .hero {
+            background: linear-gradient(135deg, rgba(34, 211, 238, 0.12), rgba(250, 204, 21, 0.10));
+            border: 1px solid var(--bordure);
+            border-radius: 18px;
+            padding: 18px;
+            margin-bottom: 18px;
+        }
+
+        .hero h1 {
+            margin: 0 0 10px;
+            color: var(--cyan);
+            font-size: 26px;
+        }
+
+        .hero p {
+            margin: 0;
+            color: var(--texte-secondaire);
+            line-height: 1.6;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 360px 1fr;
+            gap: 18px;
+        }
+
+        .card {
+            background: rgba(13, 27, 47, 0.94);
+            border: 1px solid var(--bordure);
+            border-radius: 18px;
+            padding: 16px;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+        }
+
+        .card h2 {
+            margin: 0 0 14px;
+            color: var(--jaune);
+            font-size: 18px;
+        }
+
+        label {
+            display: block;
+            margin: 12px 0 6px;
+            color: var(--cyan);
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        select,
+        input,
+        textarea {
+            width: 100%;
+            background: #020617;
+            color: var(--texte);
+            border: 1px solid var(--bordure);
+            border-radius: 10px;
+            padding: 10px;
+            font-size: 14px;
+            outline: none;
+        }
+
+        textarea {
+            min-height: 460px;
+            resize: vertical;
+            font-family: Consolas, Monaco, monospace;
+            color: #d9f99d;
+            line-height: 1.45;
+            white-space: pre;
+        }
+
+        button,
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            width: 100%;
+            margin-top: 12px;
+            padding: 12px 14px;
+            border-radius: 999px;
+            border: 1px solid var(--bordure);
+            cursor: pointer;
+            font-weight: 900;
+            font-size: 14px;
+            text-decoration: none;
+        }
+
+        .btn-main {
+            background: linear-gradient(135deg, #22d3ee, #0891b2);
+            color: #ffffff;
+        }
+
+        .btn-yellow {
+            background: linear-gradient(135deg, #facc15, #f59e0b);
+            color: #111827;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--texte);
+        }
+
+        .notice {
+            margin-top: 12px;
+            padding: 12px;
+            border-radius: 12px;
+            background: rgba(250, 204, 21, 0.10);
+            border: 1px solid rgba(250, 204, 21, 0.35);
+            color: #fde68a;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .steps {
+            margin: 0;
+            padding-left: 20px;
+            color: var(--texte-secondaire);
+            line-height: 1.65;
+            font-size: 14px;
+        }
+
+        footer {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 18px;
+            text-align: center;
+            color: var(--texte-secondaire);
+            font-size: 13px;
+        }
+
+        @media (max-width: 850px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hero h1 {
+                font-size: 22px;
+            }
+
+            nav a {
+                font-size: 13px;
+                padding: 7px 10px;
+            }
+
+            textarea {
+                min-height: 360px;
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <div class="top-bar">
+        <div class="logo">TRADING STATION <span>v2.0</span></div>
+
+        <nav>
+            <a href="index.html">Tableau principal</a>
+            <a href="pine-editor.html" class="active">Pine Editor</a>
+            <a href="pattern-ia.html">Analyse IA du graphique</a>
+            <a href="create-strategy.html">Guide stratégies</a>
+        </nav>
+    </div>
+</header>
+
+<main>
+
+    <section class="hero">
+        <h1>Pine Editor</h1>
+        <p>
+            Cette page sert d’aide pour créer, copier et préparer un script Pine Script avant de le coller
+            manuellement dans TradingView. TradingView ne permet pas à une page externe de remplir directement
+            Pine Editor.
+        </p>
+    </section>
+
+    <section class="grid">
+
+        <aside class="card">
+            <h2>Paramètres rapides</h2>
+
+            <label for="actif">Actif</label>
+            <select id="actif">
+                <option value="BINANCE:BTCUSDT">Bitcoin / USDT</option>
+                <option value="BINANCE:ETHUSDT">Ethereum / USDT</option>
+                <option value="BINANCE:SOLUSDT">Solana / USDT</option>
+                <option value="OANDA:XAUUSD">Or / Dollar - XAUUSD</option>
+                <option value="NASDAQ:NDX">Nasdaq 100</option>
+                <option value="NASDAQ:AAPL">Apple</option>
+                <option value="NASDAQ:MSFT">Microsoft</option>
+                <option value="NASDAQ:NVDA">Nvidia</option>
+            </select>
+
+            <label for="indicateur">Indicateur</label>
+            <select id="indicateur">
+                <option value="EMA">EMA</option>
+                <option value="RSI">RSI</option>
+                <option value="MACD">MACD</option>
+                <option value="SMA">SMA</option>
+                <option value="SUPERTREND">Supertrend</option>
+                <option value="BOLLINGER">Bandes de Bollinger</option>
+            </select>
+
+            <label for="intervalle">Intervalle</label>
+            <select id="intervalle">
+                <option value="1">1 minute</option>
+                <option value="5">5 minutes</option>
+                <option value="15" selected>15 minutes</option>
+                <option value="30">30 minutes</option>
+                <option value="60">1 heure</option>
+                <option value="240">4 heures</option>
+                <option value="D">1 jour</option>
+                <option value="W">1 semaine</option>
+                <option value="M">1 mois</option>
+            </select>
+
+            <label for="capital">Capital initial</label>
+            <input id="capital" type="number" value="1000" min="1">
+
+            <label for="risque">Risque par position (%)</label>
+            <input id="risque" type="number" value="1" min="0.1" step="0.1">
+
+            <label for="stop">Stop loss (%)</label>
+            <input id="stop" type="number" value="2" min="0.1" step="0.1">
+
+            <label for="gain">Take profit (%)</label>
+            <input id="gain" type="number" value="4" min="0.1" step="0.1">
+
+            <button class="btn-main" onclick="genererScript()">
+                Générer le script
+            </button>
+
+            <button class="btn-secondary" onclick="copierScript()">
+                Copier le script
+            </button>
+
+            <button class="btn-yellow" onclick="ouvrirTradingView()">
+                Ouvrir TradingView
+            </button>
+
+            <div class="notice">
+                Le script généré doit être collé manuellement dans Pine Editor.
+            </div>
+        </aside>
+
+        <section class="card">
+            <h2>Script Pine généré</h2>
+
+            <textarea id="script-output" readonly>Clique sur « Générer le script » pour créer un Pine Script.</textarea>
+        </section>
+
+    </section>
+
+    <section class="card" style="margin-top:18px;">
+        <h2>Méthode d’utilisation</h2>
+
+        <ol class="steps">
+            <li>Choisir l’actif, l’indicateur et l’intervalle.</li>
+            <li>Cliquer sur « Générer le script ».</li>
+            <li>Cliquer sur « Copier le script ».</li>
+            <li>Ouvrir TradingView.</li>
+            <li>Afficher le graphique souhaité.</li>
+            <li>Ouvrir Pine Editor dans TradingView.</li>
+            <li>Coller le script.</li>
+            <li>Cliquer sur « Ajouter au graphique ».</li>
+        </ol>
+    </section>
+
+</main>
+
+<footer>
+    Page développée par Hocine Korichi. Avril 2026, Tous droits réservés.
+</footer>
+
+<script>
+function lireValeur(id) {
+    const element = document.getElementById(id);
+    return element ? element.value : "";
+}
+
+function nombre(id, defaut) {
+    const valeur = parseFloat(lireValeur(id));
+    return isNaN(valeur) || valeur <= 0 ? defaut : valeur;
+}
+
+function genererEntete() {
+    const actif = lireValeur("actif");
+    const indicateur = lireValeur("indicateur");
+    const intervalle = lireValeur("intervalle");
+
+    return `// Actif sélectionné : ${actif}
+// Indicateur sélectionné : ${indicateur}
+// Intervalle conseillé : ${intervalle}
+// Script généré depuis Trading Station v2.0`;
+}
+
+function genererGestionRisque(stopLoss, takeProfit) {
+    return `
+stopLossPct = input.float(${stopLoss}, title="Stop loss en %", minval=0.1, step=0.1)
+takeProfitPct = input.float(${takeProfit}, title="Take profit en %", minval=0.1, step=0.1)
+
+longStop = strategy.position_avg_price * (1 - stopLossPct / 100)
+longTake = strategy.position_avg_price * (1 + takeProfitPct / 100)
+
+shortStop = strategy.position_avg_price * (1 + stopLossPct / 100)
+shortTake = strategy.position_avg_price * (1 - takeProfitPct / 100)
+
+if strategy.position_size > 0
+    strategy.exit("Sortie achat", "Achat", stop=longStop, limit=longTake)
+
+if strategy.position_size < 0
+    strategy.exit("Sortie vente", "Vente", stop=shortStop, limit=shortTake)`;
+}
+
+function genererScript() {
+    const actif = lireValeur("actif");
+    const indicateur = lireValeur("indicateur");
+    const intervalle = lireValeur("intervalle");
+
+    const capital = nombre("capital", 1000);
+    const risque = nombre("risque", 1);
+    const stopLoss = nombre("stop", 2);
+    const takeProfit = nombre("gain", 4);
+
+    const entete = genererEntete();
+    const gestionRisque = genererGestionRisque(stopLoss, takeProfit);
+
+    let script = "";
+
+    if (indicateur === "EMA") {
+        script = `//@version=5
+${entete}
+
+strategy("Stratégie EMA - ${actif} - ${intervalle}", overlay=true, initial_capital=${capital}, default_qty_type=strategy.percent_of_equity, default_qty_value=${risque})
+
+sourcePrix = close
+periodeCourte = input.int(20, title="EMA courte")
+periodeLongue = input.int(50, title="EMA longue")
+
+emaCourte = ta.ema(sourcePrix, periodeCourte)
+emaLongue = ta.ema(sourcePrix, periodeLongue)
+
+plot(emaCourte, title="EMA courte", color=color.green, linewidth=2)
+plot(emaLongue, title="EMA longue", color=color.red, linewidth=2)
+
+signalAchat = ta.crossover(emaCourte, emaLongue)
+signalVente = ta.crossunder(emaCourte, emaLongue)
+
+if signalAchat
+    strategy.entry("Achat", strategy.long)
+
+if signalVente
+    strategy.entry("Vente", strategy.short)
+
+${gestionRisque}
+
+plotshape(signalAchat, title="Signal achat", style=shape.labelup, location=location.belowbar, color=color.green, text="ACHAT")
+plotshape(signalVente, title="Signal vente", style=shape.labeldown, location=location.abovebar, color=color.red, text="VENTE")`;
+    }
+
+    if (indicateur === "RSI") {
+        script = `//@version=5
+${entete}
+
+strategy("Stratégie RSI - ${actif} - ${intervalle}", overlay=false, initial_capital=${capital}, default_qty_type=strategy.percent_of_equity, default_qty_value=${risque})
+
+periodeRsi = input.int(14, title="Période RSI")
+niveauSurachat = input.int(70, title="Niveau de surachat")
+niveauSurvente = input.int(30, title="Niveau de survente")
+
+rsiValeur = ta.rsi(close, periodeRsi)
+
+plot(rsiValeur, title="RSI", color=color.blue)
+hline(niveauSurachat, "Surachat", color=color.red)
+hline(niveauSurvente, "Survente", color=color.green)
+hline(50, "Zone neutre", color=color.gray)
+
+signalAchat = ta.crossover(rsiValeur, niveauSurvente)
+signalVente = ta.crossunder(rsiValeur, niveauSurachat)
+
+if signalAchat
+    strategy.entry("Achat", strategy.long)
+
+if signalVente
+    strategy.entry("Vente", strategy.short)
+
+${gestionRisque}`;
+    }
+
+    if (indicateur === "MACD") {
+        script = `//@version=5
+${entete}
+
+strategy("Stratégie MACD - ${actif} - ${intervalle}", overlay=false, initial_capital=${capital}, default_qty_type=strategy.percent_of_equity, default_qty_value=${risque})
+
+[macdLine, signalLine, histLine] = ta.macd(close, 12, 26, 9)
+
+plot(macdLine, title="MACD", color=color.blue)
+plot(signalLine, title="Signal", color=color.orange)
+plot(histLine, title="Histogramme", style=plot.style_columns, color=histLine >= 0 ? color.green : color.red)
+
+signalAchat = ta.crossover(macdLine, signalLine)
+signalVente = ta.crossunder(macdLine, signalLine)
+
+if signalAchat
+    strategy.entry("Achat", strategy.long)
+
+if signalVente
+    strategy.entry("Vente", strategy.short)
+
+${gestionRisque}`;
+    }
+
+    if (indicateur === "SMA") {
+        script = `//@version=5
+${entete}
+
+strategy("Stratégie SMA - ${actif} - ${intervalle}", overlay=true, initial_capital=${capital}, default_qty_type=strategy.percent_of_equity, default_qty_value=${risque})
+
+smaCourte = ta.sma(close, 50)
+smaLongue = ta.sma(close, 200)
+
+plot(smaCourte, title="SMA courte", color=color.blue, linewidth=2)
+plot(smaLongue, title="SMA longue", color=color.orange, linewidth=2)
+
+signalAchat = ta.crossover(smaCourte, smaLongue)
+signalVente = ta.crossunder(smaCourte, smaLongue)
+
+if signalAchat
+    strategy.entry("Achat", strategy.long)
+
+if signalVente
+    strategy.entry("Vente", strategy.short)
+
+${gestionRisque}`;
+    }
+
+    if (indicateur === "SUPERTREND") {
+        script = `//@version=5
+${entete}
+
+strategy("Stratégie Supertrend - ${actif} - ${intervalle}", overlay=true, initial_capital=${capital}, default_qty_type=strategy.percent_of_equity, default_qty_value=${risque})
+
+facteur = input.float(3.0, title="Facteur")
+periodeAtr = input.int(10, title="Période ATR")
+
+[supertrend, direction] = ta.supertrend(facteur, periodeAtr)
+
+couleur = direction < 0 ? color.green : color.red
+
+plot(supertrend, title="Supertrend", color=couleur, linewidth=2)
+
+signalAchat = direction < 0 and direction[1] > 0
+signalVente = direction > 0 and direction[1] < 0
+
+if signalAchat
+    strategy.entry("Achat", strategy.long)
+
+if signalVente
+    strategy.entry("Vente", strategy.short)
+
+${gestionRisque}`;
+    }
+
+    if (indicateur === "BOLLINGER") {
+        script = `//@version=5
+${entete}
+
+strategy("Stratégie Bollinger - ${actif} - ${intervalle}", overlay=true, initial_capital=${capital}, default_qty_type=strategy.percent_of_equity, default_qty_value=${risque})
+
+periode = input.int(20, title="Période")
+multiplicateur = input.float(2.0, title="Multiplicateur")
+
+base = ta.sma(close, periode)
+ecart = multiplicateur * ta.stdev(close, periode)
+
+bandeHaute = base + ecart
+bandeBasse = base - ecart
+
+plot(base, title="Moyenne", color=color.blue)
+plot(bandeHaute, title="Bande haute", color=color.orange)
+plot(bandeBasse, title="Bande basse", color=color.orange)
+
+signalAchat = close < bandeBasse
+signalVente = close > bandeHaute
+
+if signalAchat
+    strategy.entry("Achat", strategy.long)
+
+if signalVente
+    strategy.entry("Vente", strategy.short)
+
+${gestionRisque}`;
+    }
+
+    document.getElementById("script-output").value = script;
+}
+
+function copierScript() {
+    const zone = document.getElementById("script-output");
+
+    if (!zone || !zone.value.trim()) {
+        alert("Aucun script à copier.");
+        return;
+    }
+
+    navigator.clipboard.writeText(zone.value)
+        .then(function () {
+            alert("Le Pine Script a été copié.");
+        })
+        .catch(function () {
+            alert("La copie automatique a échoué. Sélectionne le texte et copie-le manuellement.");
+        });
+}
+
+function ouvrirTradingView() {
+    const actif = lireValeur("actif");
+    const intervalle = lireValeur("intervalle");
+
+    const url =
+        "https://www.tradingview.com/chart/?symbol=" +
+        encodeURIComponent(actif) +
+        "&interval=" +
+        encodeURIComponent(intervalle);
+
+    window.open(url, "_blank");
+}
+
+function reprendreParametresDepuisIndex() {
+    const actif = localStorage.getItem("trading_actif");
+    const intervalle = localStorage.getItem("trading_intervalle");
+    const indicateur = localStorage.getItem("trading_indicateur");
+
+    if (actif && document.getElementById("actif")) {
+        const select = document.getElementById("actif");
+        const existe = Array.from(select.options).some(option => option.value === actif);
+        if (existe) {
+            select.value = actif;
+        }
+    }
+
+    if (indicateur && document.getElementById("indicateur")) {
+        const select = document.getElementById("indicateur");
+        const existe = Array.from(select.options).some(option => option.value === indicateur);
+        if (existe) {
+            select.value = indicateur;
+        }
+    }
+
+    if (intervalle && document.getElementById("intervalle")) {
+        const tableInverse = {
+            "1m": "1",
+            "5m": "5",
+            "15m": "15",
+            "30m": "30",
+            "1h": "60",
+            "4h": "240",
+            "1d": "D"
+        };
+
+        const valeur = tableInverse[intervalle] || intervalle;
+        const select = document.getElementById("intervalle");
+        const existe = Array.from(select.options).some(option => option.value === valeur);
+
+        if (existe) {
+            select.value = valeur;
+        }
+    }
+}
+
+document.addEventListener("DOMContentLoaded", reprendreParametresDepuisIndex);
+</script>
+
+</body>
+</html>

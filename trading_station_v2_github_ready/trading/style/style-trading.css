@@ -1,0 +1,37 @@
+:root {
+    --bg: #0b0e11;
+    --card: #1e2329;
+    --gold: #f0b90b;
+    --text: #eaecef;
+    --border: #30363d;
+}
+
+body { background: var(--bg); color: var(--text); font-family: sans-serif; margin: 0; height: 100vh; overflow: hidden; }
+
+.top-bar {
+    height: 60px; background: var(--card); display: flex; align-items: center;
+    justify-content: space-between; padding: 0 20px; border-bottom: 1px solid var(--border);
+}
+
+.logo { color: var(--gold); font-weight: bold; font-size: 1.2rem; }
+.logo span { color: white; font-weight: 100; }
+
+#asset-selector {
+    background: #2b3139; color: white; border: 1px solid var(--gold);
+    padding: 8px 15px; border-radius: 4px; font-size: 1rem; width: 250px; cursor: pointer;
+}
+
+.main-layout { display: flex; height: calc(100vh - 60px); }
+
+.chart-section { flex: 4; border-right: 1px solid var(--border); }
+#tv_chart_container { height: 100%; width: 100%; }
+
+.analysis-sidebar { flex: 1; padding: 20px; background: #161a1e; }
+
+.card { background: var(--card); padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid var(--border); }
+.signal-display { padding: 20px; text-align: center; font-weight: bold; border-radius: 4px; font-size: 1.1rem; }
+
+.active { color: var(--gold); }
+.neutral { background: #2b3139; color: #707a8a; }
+.buy-bg { background: rgba(14, 203, 129, 0.2); color: #0ecb81; border: 1px solid #0ecb81; }
+.sell-bg { background: rgba(246, 70, 93, 0.2); color: #f6465d; border: 1px solid #f6465d; }

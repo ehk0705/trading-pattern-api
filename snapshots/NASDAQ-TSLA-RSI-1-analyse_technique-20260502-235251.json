@@ -1,0 +1,48 @@
+{
+    "nom": "Configuration TradingView IA",
+    "dateCapture": "2026-05-03T03:52:20.526Z",
+    "serveur": {
+        "apiAnalyse": "https://trading-pattern-api.onrender.com/api/analyse",
+        "apiTest": "https://trading-pattern-api.onrender.com/api/test",
+        "hebergeur": "Render",
+        "type": "Node.js"
+    },
+    "graphique": {
+        "actif": "NASDAQ:TSLA",
+        "actifLibelle": "Tesla - TSLA",
+        "intervalle": "1",
+        "intervalleLibelle": "1 minute",
+        "indicateur": "RSI",
+        "indicateurLibelle": "RSI",
+        "typeBougie": "bougies_japonaises",
+        "typeBougieLibelle": "Bougies japonaises",
+        "source": "widget_tradingview_integre"
+    },
+    "analyseIA": {
+        "categorie": "analyse_technique",
+        "categorieLibelle": "Analyse technique",
+        "descriptionCategorie": "Analyse technique : graphiques, tendances, supports, résistances, RSI et moyennes mobiles.",
+        "strategie": "suivi_tendance",
+        "statut": "pret_pour_analyse"
+    },
+    "risque": {
+        "capitalInitial": 1000,
+        "risqueParPositionPourcent": 1,
+        "stopLossPourcent": 2,
+        "takeProfitPourcent": 4,
+        "levier": 1,
+        "sens": "achat_vente"
+    },
+    "snapshot": {
+        "url": "",
+        "categorieAnalyse": "analyse_technique",
+        "categorieAnalyseLibelle": "Analyse technique",
+        "descriptionCategorieAnalyse": "Analyse technique : graphiques, tendances, supports, résistances, RSI et moyennes mobiles."
+    },
+    "notes": "",
+    "limites": {
+        "captureCompleteTradingView": false,
+        "dessinsInternesTradingView": false,
+        "remarque": "La page capture les paramètres contrôlés par l’interface HTML, la catégorie d’analyse et le lien éventuel du snapshot."
+    }
+}

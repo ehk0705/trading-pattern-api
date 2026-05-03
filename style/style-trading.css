@@ -1,0 +1,197 @@
+:root {
+    --bg: #0b0e11;
+    --card: #1e2329;
+    --gold: #f0b90b;
+    --text: #eaecef;
+    --border: #30363d;
+}
+
+body { 
+    background: var(--bg); 
+    color: var(--text); 
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+    margin: 0; 
+    height: 100vh; 
+    overflow: hidden; 
+}
+
+.top-bar {
+    height: 70px; 
+    background: var(--card); 
+    display: flex; 
+    align-items: center;
+    justify-content: space-between; 
+    padding: 0 20px; 
+    border-bottom: 1px solid var(--border);
+}
+
+.brand-group { 
+    display: flex; 
+    flex-direction: column; 
+}
+
+.logo { 
+    color: var(--gold); 
+    font-weight: bold; 
+    font-size: 1.2rem; 
+}
+
+.logo span { 
+    color: white; 
+    font-weight: 100; 
+}
+
+.credits { 
+    font-size: 0.7rem; 
+    color: #707a8a; 
+    margin-top: 2px; 
+}
+
+.search-area { 
+    display: flex; 
+    gap: 20px; 
+}
+
+.input-group { 
+    display: flex; 
+    align-items: center; 
+    gap: 10px; 
+}
+
+.input-group label { 
+    font-size: 0.75rem; 
+    font-weight: bold; 
+    color: #707a8a; 
+}
+
+select {
+    background: #2b3139; 
+    color: white; 
+    border: 1px solid var(--border);
+    padding: 8px 12px; 
+    border-radius: 4px; 
+    font-size: 0.9rem; 
+    cursor: pointer;
+    min-width: 180px;
+    transition: border-color 0.2s;
+}
+
+select:focus { 
+    border-color: var(--gold); 
+    outline: none; 
+}
+
+.main-layout { 
+    display: flex; 
+    height: calc(100vh - 70px); 
+}
+
+.chart-section { 
+    flex: 4; 
+    border-right: 1px solid var(--border); 
+    background: #000; 
+}
+
+#tv_chart_container { 
+    height: 100%; 
+    width: 100%; 
+}
+
+.analysis-sidebar { 
+    flex: 1; 
+    padding: 20px; 
+    background: #161a1e; 
+    overflow-y: auto; 
+}
+
+/* Cartes */
+.card { 
+    background: var(--card); 
+    padding: 15px; 
+    border-radius: 8px; 
+    margin-bottom: 20px; 
+    border: 1px solid var(--border);
+
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+.card h3 { 
+    margin-top: 0; 
+    margin-bottom: 10px;
+    font-size: 14px; 
+    color: #707a8a; 
+    text-transform: uppercase; 
+    letter-spacing: 1px; 
+}
+
+.card div,
+.card p {
+    font-size: 13px;
+    line-height: 1.4;
+    margin-top: 4px;
+    margin-bottom: 4px;
+}
+
+/* Texte personnalisé */
+#custom-text { 
+    font-size: 13px; 
+    line-height: 1.5; 
+    color: var(--text); 
+    margin-bottom: 15px; 
+}
+
+/* Signal */
+.signal-display { 
+    padding: 15px; 
+    text-align: center; 
+    font-weight: bold; 
+    border-radius: 4px; 
+    font-size: 1rem; 
+}
+
+.active { 
+    color: var(--gold); 
+}
+
+.neutral { 
+    background: #2b3139; 
+    color: #707a8a; 
+}
+
+.buy-bg { 
+    background: rgba(14, 203, 129, 0.15); 
+    color: #0ecb81; 
+    border: 1px solid #0ecb81; 
+}
+
+.sell-bg { 
+    background: rgba(246, 70, 93, 0.15); 
+    color: #f6465d; 
+    border: 1px solid #f6465d; 
+}
+
+/* Bouton Pine Editor */
+.btn-pine {
+    display: block;
+    text-align: center;
+    background: transparent;
+    color: yellow;
+    border: 1px solid var(--gold);
+    padding: 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: bold;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.btn-pine:hover { 
+    background: var(--gold); 
+    color: #000; 
+}

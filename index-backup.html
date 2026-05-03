@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trading Station v2.0</title>
+    <link rel="stylesheet" href="style/style-trading.css">
+    <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+</head>
+<body>
+<header class="top-bar">
+    <div class="logo">
+        TRADING STATION <span>v2.0</span>
+    </div>
+
+    <div class="search-area">
+        <label for="asset-selector">ACTIF :</label>
+
+        <select id="asset-selector" name="asset-selector">
+            <optgroup label="Cryptomonnaies">
+                <option value="BINANCE:BTCUSDT">Bitcoin / USDT - Binance</option>
+                <option value="COINBASE:BTCUSD">Bitcoin / USD - Coinbase</option>
+                <option value="BINANCE:ETHUSDT">Ethereum / USDT - Binance</option>
+                <option value="BINANCE:SOLUSDT">Solana / USDT - Binance</option>
+                <option value="BINANCE:BNBUSDT">BNB / USDT - Binance</option>
+                <option value="BINANCE:XRPUSDT">XRP / USDT - Binance</option>
+            </optgroup>
+
+            <optgroup label="Métaux précieux">
+                <option value="OANDA:XAUUSD">Or / Dollar - XAUUSD</option>
+                <option value="TVC:GOLD">Or - GOLD</option>
+                <option value="OANDA:XAGUSD">Argent / Dollar - XAGUSD</option>
+            </optgroup>
+
+            <optgroup label="Indices boursiers">
+                <option value="NASDAQ:NDX">NASDAQ 100</option>
+                <option value="SP:SPX">S&amp;P 500</option>
+                <option value="DJ:DJI">Dow Jones</option>
+                <option value="TVC:DXY">Dollar Index - DXY</option>
+            </optgroup>
+
+            <optgroup label="Actions américaines">
+                <option value="NASDAQ:AAPL">Apple - AAPL</option>
+                <option value="NASDAQ:MSFT">Microsoft - MSFT</option>
+                <option value="NASDAQ:TSLA">Tesla - TSLA</option>
+                <option value="NASDAQ:NVDA">Nvidia - NVDA</option>
+                <option value="NASDAQ:AMZN">Amazon - AMZN</option>
+                <option value="NASDAQ:GOOGL">Alphabet - GOOGL</option>
+                <option value="NASDAQ:META">Meta - META</option>
+            </optgroup>
+        </select>
+
+        <label for="indicator-selector">INDICATEUR :</label>
+        <select id="indicator-selector" name="indicator-selector">
+            <optgroup label="Indicateurs techniques">
+                <option value="RSI">RSI</option>
+                <option value="MACD">MACD</option>
+                <option value="EMA">Moyenne mobile exponentielle</option>
+                <option value="SMA">Moyenne mobile simple</option>
+                <option value="BOLLINGER">Bandes de Bollinger</option>
+                <option value="ICHIMOKU">Ichimoku</option>
+                <option value="SUPERTREND">Supertrend</option>
+            </optgroup>
+
+            <optgroup label="Analyse de tendance">
+                <option value="EMA_20">EMA 20</option>
+                <option value="EMA_50">EMA 50</option>
+                <option value="EMA_200">EMA 200</option>
+                <option value="VOLUME">Volume</option>
+                <option value="ATR">ATR - volatilité</option>
+            </optgroup>
+        </select>
+    </div>
+</header>
+    <main class="main-layout">
+        <section class="chart-section">
+            <div id="tv_chart_container"></div>
+        </section>
+        
+        <aside class="analysis-sidebar">
+            <div class="card">
+                <h3>STATUT</h3>
+                <div id="signal-box" class="signal-display neutral">ANALYSE EN COURS...</div>
+            </div>
+            <div class="card">
+                <h3>INFOS PRO</h3>
+                <p>Moteur : <span class="active">Connecté</span></p>
+                <p>Update : <span class="active">Temps Réel</span></p>
+            </div>
+        </aside>
+    </main>
+
+    <!-- Chargement des scripts dans l'ordre critique pour GitHub -->
+    <script src="js/moteur-analyse.js"></script>
+    <script src="js/data-feed.js"></script>
+    <script src="js/main-app.js"></script>
+</body>
+</html>

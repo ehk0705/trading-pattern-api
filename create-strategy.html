@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Créer des stratégies TradingView avec Pine Script</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      background: #0f172a;
+      color: #e5e7eb;
+    }
+
+    header {
+      background: linear-gradient(135deg, #111827, #1e3a8a);
+      padding: 35px 20px;
+      text-align: center;
+      border-bottom: 3px solid #facc15;
+    }
+
+    header h1 {
+      font-size: 2rem;
+      color: #facc15;
+      margin-bottom: 10px;
+    }
+
+    header p {
+      max-width: 850px;
+      margin: auto;
+      color: #d1d5db;
+      font-size: 1rem;
+    }
+
+    nav {
+      background: #020617;
+      padding: 12px;
+      text-align: center;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      border-bottom: 1px solid #334155;
+    }
+
+    nav a {
+      color: #facc15;
+      text-decoration: none;
+      margin: 0 10px;
+      font-weight: bold;
+      font-size: 0.95rem;
+    }
+
+    nav a:hover {
+      color: #ffffff;
+    }
+
+    main {
+      max-width: 1100px;
+      margin: auto;
+      padding: 25px 15px;
+    }
+
+    section {
+      background: #111827;
+      margin-bottom: 25px;
+      padding: 22px;
+      border-radius: 12px;
+      border: 1px solid #334155;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.35);
+    }
+
+    h2 {
+      color: #facc15;
+      margin-bottom: 15px;
+      font-size: 1.4rem;
+      border-bottom: 1px solid #374151;
+      padding-bottom: 8px;
+    }
+
+    h3 {
+      color: #93c5fd;
+      margin-top: 15px;
+      margin-bottom: 10px;
+    }
+
+    p {
+      margin-bottom: 12px;
+    }
+
+    ul,
+    ol {
+      margin-left: 22px;
+      margin-bottom: 12px;
+    }
+
+    li {
+      margin-bottom: 8px;
+    }
+
+    .important {
+      background: #1e293b;
+      border-left: 5px solid #facc15;
+      padding: 14px;
+      border-radius: 8px;
+      margin: 15px 0;
+    }
+
+    .warning {
+      background: #450a0a;
+      border-left: 5px solid #ef4444;
+      padding: 14px;
+      border-radius: 8px;
+      margin: 15px 0;
+      color: #fee2e2;
+    }
+
+    .success {
+      background: #052e16;
+      border-left: 5px solid #22c55e;
+      padding: 14px;
+      border-radius: 8px;
+      margin: 15px 0;
+      color: #dcfce7;
+    }
+
+    .info {
+      background: #082f49;
+      border-left: 5px solid #06b6d4;
+      padding: 14px;
+      border-radius: 8px;
+      margin: 15px 0;
+      color: #e0f2fe;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 18px;
+      margin-top: 15px;
+    }
+
+    .card {
+      background: #020617;
+      padding: 18px;
+      border-radius: 10px;
+      border: 1px solid #334155;
+    }
+
+    .card h3 {
+      color: #facc15;
+      margin-bottom: 10px;
+    }
+
+    pre {
+      background: #020617;
+      color: #d1fae5;
+      padding: 18px;
+      border-radius: 10px;
+      overflow-x: auto;
+      border: 1px solid #334155;
+      font-size: 0.9rem;
+      margin-top: 15px;
+    }
+
+    code {
+      font-family: Consolas, monospace;
+    }
+
+    .btn,
+    .btn-guide {
+      display: inline-block;
+      background: #facc15;
+      color: #111827;
+      padding: 12px 18px;
+      border-radius: 8px;
+      font-weight: bold;
+      text-decoration: none;
+      margin-top: 10px;
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn:hover,
+    .btn-guide:hover {
+      background: #fde047;
+    }
+
+    .guide-section {
+      margin-top: 35px;
+      background: #111827;
+    }
+
+    .guide-intro {
+      background: #1e293b;
+      border-left: 5px solid #38bdf8;
+      padding: 14px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+
+    .guide-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 18px;
+      margin-top: 15px;
+    }
+
+    .guide-card {
+      background: #020617;
+      padding: 18px;
+      border-radius: 10px;
+      border: 1px solid #334155;
+    }
+
+    .guide-card img {
+      width: 100%;
+      max-height: 220px;
+      object-fit: cover;
+      border-radius: 10px;
+      border: 1px solid #334155;
+      margin-bottom: 12px;
+    }
+
+    .copy-zone {
+      background: #020617;
+      color: #d1fae5;
+      padding: 14px;
+      border-radius: 10px;
+      overflow-x: auto;
+      border: 1px solid #334155;
+      font-size: 0.88rem;
+      margin-top: 12px;
+      margin-bottom: 12px;
+      white-space: pre-wrap;
+    }
+
+    .guide-success {
+      margin-top: 25px;
+      padding: 18px;
+      background: #052e16;
+      border-left: 5px solid #22c55e;
+      border-radius: 10px;
+    }
+
+    .guide-warning {
+      margin-top: 25px;
+      padding: 18px;
+      background: #450a0a;
+      border-left: 5px solid #ef4444;
+      border-radius: 10px;
+      color: #fee2e2;
+    }
+
+    .method-box {
+      background: #082f49;
+      border-left: 5px solid #06b6d4;
+      padding: 18px;
+      border-radius: 10px;
+      margin-top: 18px;
+    }
+
+    .method-steps {
+      counter-reset: step-counter;
+      list-style: none;
+      margin-left: 0;
+    }
+
+    .method-steps li {
+      counter-increment: step-counter;
+      background: #020617;
+      border: 1px solid #334155;
+      padding: 14px;
+      border-radius: 10px;
+      margin-bottom: 12px;
+      position: relative;
+      padding-left: 52px;
+    }
+
+    .method-steps li::before {
+      content: counter(step-counter);
+      position: absolute;
+      left: 15px;
+      top: 14px;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: #facc15;
+      color: #111827;
+      font-weight: bold;
+      text-align: center;
+      line-height: 26px;
+    }
+
+    .keyboard {
+      display: inline-block;
+      background: #111827;
+      border: 1px solid #475569;
+      color: #facc15;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-family: Consolas, monospace;
+      font-weight: bold;
+    }
+
+    footer {
+      text-align: center;
+      padding: 22px;
+      background: #020617;
+      color: #9ca3af;
+      border-top: 1px solid #334155;
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 600px) {
+      header h1 {
+        font-size: 1.5rem;
+      }
+
+      nav a {
+        display: inline-block;
+        margin: 6px;
+        font-size: 0.85rem;
+      }
+
+      section {
+        padding: 17px;
+      }
+
+      pre,
+      .copy-zone {
+        font-size: 0.78rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <h1>Créer des stratégies pour TradingView</h1>
+  <p>
+    Page pédagogique pour comprendre comment créer, tester et améliorer des scripts de stratégies
+    avec Pine Script dans TradingView.
+  </p>
+</header>
+
+<nav>
+  <a href="#intro">Introduction</a>
+  <a href="#difference">Indicateur ou stratégie</a>
+  <a href="#elements">Éléments clés</a>
+  <a href="#exemples">Exemples</a>
+  <a href="#script">Script Pine</a>
+  <a href="#methode">Méthode</a>
+  <a href="#risques">Risques</a>
+  <a href="#guide-utilisation">Guide d’utilisation</a>
+  <a href="#coller-script">Pine Editor</a>
+  <a href="index.html">Retour</a>
+</nav>
+
+<main>
+
+  <section id="intro">
+    <h2>1. Introduction</h2>
+
+    <p>
+      TradingView permet d’analyser les marchés financiers avec des graphiques, des indicateurs
+      techniques et des scripts personnalisés.
+    </p>
+
+    <p>
+      Pour créer ses propres règles d’achat et de vente, on utilise le langage
+      <strong>Pine Script</strong>. Ce langage permet de programmer des indicateurs,
+      des alertes et des stratégies de trading.
+    </p>
+
+    <div class="important">
+      Une stratégie TradingView ne sert pas seulement à afficher un signal.
+      Elle permet aussi de tester automatiquement une méthode sur les données passées.
+    </div>
+  </section>
+
+  <section id="difference">
+    <h2>2. Différence entre indicateur et stratégie</h2>
+
+    <div class="grid">
+      <div class="card">
+        <h3>Indicateur</h3>
+        <p>
+          Un indicateur affiche une information sur le graphique.
+        </p>
+        <ul>
+          <li>RSI</li>
+          <li>MACD</li>
+          <li>Moyennes mobiles</li>
+          <li>Bandes de Bollinger</li>
+          <li>Supertrend</li>
+        </ul>
+        <p>
+          Il aide à lire le marché, mais il ne simule pas automatiquement des achats ou des ventes.
+        </p>
+      </div>
+
+      <div class="card">
+        <h3>Stratégie</h3>
+        <p>
+          Une stratégie contient des règles précises.
+        </p>
+        <ul>
+          <li>Condition d’achat</li>
+          <li>Condition de vente</li>
+          <li>Stop loss</li>
+          <li>Take profit</li>
+          <li>Gestion du risque</li>
+        </ul>
+        <p>
+          Elle permet de faire un backtest pour mesurer les résultats d’une méthode.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section id="elements">
+    <h2>3. Éléments essentiels d’une stratégie</h2>
+
+    <p>
+      Une bonne stratégie doit être construite avec des règles simples, testables et compréhensibles.
+    </p>
+
+    <ul>
+      <li><strong>Actif :</strong> Bitcoin, Ethereum, or, Nasdaq, Apple, etc.</li>
+      <li><strong>Unité de temps :</strong> 1 minute, 15 minutes, 1 heure, 1 jour.</li>
+      <li><strong>Signal d’entrée :</strong> moment où la stratégie ouvre une position.</li>
+      <li><strong>Signal de sortie :</strong> moment où la stratégie ferme la position.</li>
+      <li><strong>Stop loss :</strong> limite de perte acceptée.</li>
+      <li><strong>Take profit :</strong> objectif de gain.</li>
+      <li><strong>Filtre de tendance :</strong> éviter d’acheter contre la tendance principale.</li>
+      <li><strong>Gestion du capital :</strong> ne jamais risquer trop sur une seule position.</li>
+    </ul>
+  </section>
+
+  <section id="exemples">
+    <h2>4. Exemples de stratégies possibles</h2>
+
+    <div class="grid">
+      <div class="card">
+        <h3>Stratégie RSI</h3>
+        <p>
+          Achat lorsque le RSI sort d’une zone de survente.
+          Vente lorsque le RSI entre en zone de surachat.
+        </p>
+      </div>
+
+      <div class="card">
+        <h3>Stratégie MACD</h3>
+        <p>
+          Achat lorsque la ligne MACD croise à la hausse sa ligne de signal.
+          Vente lorsque le croisement inverse apparaît.
+        </p>
+      </div>
+
+      <div class="card">
+        <h3>Stratégie EMA</h3>
+        <p>
+          Achat lorsque une moyenne mobile courte passe au-dessus d’une moyenne mobile longue.
+          Vente dans le cas inverse.
+        </p>
+      </div>
+
+      <div class="card">
+        <h3>Stratégie Supertrend</h3>
+        <p>
+          Achat lorsque le Supertrend passe en tendance haussière.
+          Vente lorsqu’il passe en tendance baissière.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section id="script">
+    <h2>5. Exemple simple de stratégie Pine Script</h2>
+
+    <p>
+      Voici un exemple de stratégie basée sur deux moyennes mobiles exponentielles.
+      Elle achète quand la moyenne courte croise au-dessus de la moyenne longue.
+      Elle vend quand le croisement inverse apparaît.
+    </p>
+
+<pre><code>//@version=5
+strategy("Stratégie simple EMA", overlay=true)
+
+// Paramètres
+emaCourte = input.int(20, title="EMA courte")
+emaLongue = input.int(50, title="EMA longue")
+
+// Calcul des moyennes mobiles
+ema20 = ta.ema(close, emaCourte)
+ema50 = ta.ema(close, emaLongue)
+
+// Affichage sur le graphique
+plot(ema20, color=color.green, title="EMA courte")
+plot(ema50, color=color.red, title="EMA longue")
+
+// Conditions d'achat et de vente
+achat = ta.crossover(ema20, ema50)
+vente = ta.crossunder(ema20, ema50)
+
+// Exécution des ordres
+if achat
+    strategy.entry("Achat", strategy.long)
+
+if vente
+    strategy.close("Achat")
+</code></pre>
+
+    <div class="important">
+      Ce script est volontairement simple. Il sert de base pédagogique.
+      Il ne doit pas être utilisé seul pour trader avec de l’argent réel.
+    </div>
+  </section>
+
+  <section id="methode">
+    <h2>6. Méthode pour créer une stratégie</h2>
+
+    <h3>Étape 1 : définir l’idée</h3>
+    <p>
+      Il faut commencer par une règle claire :
+      acheter quand tel signal apparaît, vendre quand tel autre signal apparaît.
+    </p>
+
+    <h3>Étape 2 : choisir les indicateurs</h3>
+    <p>
+      Par exemple : RSI, MACD, EMA, volume, Supertrend ou zones de support et résistance.
+    </p>
+
+    <h3>Étape 3 : écrire le script Pine</h3>
+    <p>
+      Le script doit traduire les règles de trading en conditions logiques.
+    </p>
+
+    <h3>Étape 4 : tester la stratégie</h3>
+    <p>
+      TradingView permet de faire un backtest pour voir les performances passées.
+    </p>
+
+    <h3>Étape 5 : corriger et améliorer</h3>
+    <p>
+      Une stratégie doit être testée sur plusieurs actifs, plusieurs périodes et plusieurs conditions de marché.
+    </p>
+  </section>
+
+  <section id="risques">
+    <h2>7. Attention aux risques</h2>
+
+    <div class="warning">
+      Le trading comporte un risque élevé de perte. Une stratégie rentable dans le passé
+      peut devenir mauvaise dans le futur. Aucun script ne garantit un gain.
+    </div>
+
+    <p>
+      Une stratégie sérieuse doit toujours intégrer :
+    </p>
+
+    <ul>
+      <li>une limite de perte ;</li>
+      <li>une taille de position raisonnable ;</li>
+      <li>un objectif clair ;</li>
+      <li>un test sur plusieurs périodes ;</li>
+      <li>une validation avant toute utilisation réelle.</li>
+    </ul>
+
+    <a href="https://www.tradingview.com/pine-script-docs/" target="_blank" class="btn">
+      Documentation Pine Script
+    </a>
+  </section>
+
+  <section id="guide-utilisation" class="guide-section">
+    <h2>8. Guide d’utilisation : ouvrir TradingView avec un script Pine Script</h2>
+
+    <p class="guide-intro">
+      Cette section explique comment utiliser une page HTML pour préparer un script Pine Script,
+      le copier, l’ouvrir dans TradingView, puis l’ajouter ou le mettre à jour sur le graphique.
+      Il faut retenir une limite importante : TradingView permet d’ouvrir un graphique avec un actif
+      et une unité de temps, mais ne permet pas d’injecter automatiquement un script Pine Script privé
+      dans Pine Editor depuis une simple adresse URL.
+    </p>
+
+    <div class="guide-grid">
+
+      <div class="guide-card">
+        <img src="img/tradingview-chart.jfif" alt="Graphique TradingView avec un actif sélectionné">
+
+        <h3>1. Ouvrir TradingView avec un actif</h3>
+
+        <p>
+          Il est possible d’ouvrir TradingView directement avec un symbole, par exemple Bitcoin,
+          Ethereum, l’or, le Nasdaq ou une action comme Apple.
+        </p>
+
+        <div class="copy-zone">
+https://www.tradingview.com/chart/?symbol=BINANCE:BTCUSDT&interval=60
+        </div>
+
+        <p>
+          Cette méthode ouvre le graphique de l’actif choisi avec une unité de temps donnée.
+          Par contre, elle ne charge pas automatiquement un script Pine Script personnalisé.
+        </p>
+
+        <a class="btn-guide"
+           href="https://www.tradingview.com/chart/?symbol=BINANCE:BTCUSDT&interval=60"
+           target="_blank">
+          Ouvrir Bitcoin dans TradingView
+        </a>
+      </div>
+
+      <div class="guide-card">
+        <img src="img/pine-editor.jfif" alt="Éditeur Pine Script dans TradingView">
+
+        <h3>2. Limite importante</h3>
+
+        <p>
+          On ne peut pas appeler TradingView avec un paramètre contenant directement le code Pine Script.
+          Une adresse comme celle-ci ne fonctionne pas :
+        </p>
+
+        <div class="copy-zone">
+https://www.tradingview.com/chart/?script=mon_script_pine
+        </div>
+
+        <p>
+          Le Pine Editor doit être ouvert dans TradingView.
+          Le script doit ensuite être collé, sauvegardé, puis ajouté au graphique manuellement.
+        </p>
+      </div>
+
+      <div class="guide-card">
+        <img src="img/copier-script.jfif" alt="Copie d’un script Pine Script depuis une page HTML">
+
+        <h3>3. Première utilisation du script</h3>
+
+        <p>
+          Lorsqu’un script Pine Script est créé pour la première fois, la bonne méthode est la suivante :
+        </p>
+
+        <ol>
+          <li>Copier le script depuis la page HTML.</li>
+          <li>Ouvrir TradingView.</li>
+          <li>Ouvrir Pine Editor.</li>
+          <li>Coller le script dans Pine Editor.</li>
+          <li>Cliquer sur <strong>Save</strong> ou <strong>Sauvegarder</strong>.</li>
+          <li>Cliquer sur <strong>Add to chart</strong> ou <strong>Ajouter au graphique</strong>.</li>
+        </ol>
+
+        <div class="important">
+          Il ne faut pas seulement sauvegarder le script. Il faut aussi l’ajouter au graphique.
+        </div>
+      </div>
+
+      <div class="guide-card">
+        <img src="img/backtest-strategy.jfif" alt="Test d’une stratégie dans TradingView">
+
+        <h3>4. Mettre à jour un script déjà ajouté</h3>
+
+        <p>
+          Si le script est déjà affiché sur le graphique et que tu modifies son code,
+          il n’est pas nécessaire de rafraîchir la page du navigateur.
+        </p>
+
+        <ol>
+          <li>Modifier le code dans Pine Editor.</li>
+          <li>Cliquer sur <strong>Save</strong> ou <strong>Sauvegarder</strong>.</li>
+          <li>Cliquer sur <strong>Update on chart</strong> ou <strong>Mettre à jour sur le graphique</strong>, si ce bouton apparaît.</li>
+          <li>Si ce bouton n’apparaît pas, supprimer l’ancien indicateur du graphique.</li>
+          <li>Cliquer de nouveau sur <strong>Add to chart</strong>.</li>
+        </ol>
+      </div>
+
+    </div>
+
+    <div class="info">
+      <h3>Faut-il rafraîchir la page TradingView ?</h3>
+
+      <p>
+        Non. Rafraîchir la page du navigateur n’est pas la bonne méthode.
+        Le bon réflexe est d’utiliser les boutons de Pine Editor :
+      </p>
+
+      <div class="copy-zone">
+Première utilisation :
+Save
+↓
+Add to chart
+
+Après modification du script :
+Save
+↓
+Update on chart
+
+Si Update on chart n’apparaît pas :
+supprimer l’ancien indicateur
+↓
+Add to chart
+      </div>
+    </div>
+
+    <div class="guide-success">
+      <h3>Exemple pratique intégré</h3>
+
+      <p>
+        Le bouton ci-dessous copie un exemple simple de script Pine Script basé sur le RSI.
+        Après la copie, ouvre TradingView, puis colle le code dans Pine Editor.
+      </p>
+
+      <button class="btn-guide" onclick="copierScriptPine()">
+        Copier le script Pine Script
+      </button>
+
+      <a class="btn-guide"
+         href="https://www.tradingview.com/chart/?symbol=BINANCE:BTCUSDT&interval=60"
+         target="_blank">
+        Ouvrir TradingView
+      </a>
+
+<pre id="script-pine-guide" class="copy-zone">
+//@version=5
+indicator("Exemple RSI pédagogique", overlay=false)
+
+rsi = ta.rsi(close, 14)
+
+plot(rsi, title="RSI", color=color.blue)
+
+hline(70, "Zone de surachat")
+hline(30, "Zone de survente")
+hline(50, "Zone neutre")
+</pre>
+    </div>
+
+    <div class="guide-warning">
+      <h3>Attention</h3>
+
+      <p>
+        Ce script est fourni uniquement à des fins pédagogiques.
+        Il ne constitue pas un conseil financier. Une stratégie doit toujours être testée,
+        corrigée et validée avant toute utilisation réelle.
+      </p>
+    </div>
+  </section>
+
+  <section id="coller-script">
+    <h2>9. Ouvrir Pine Editor dans TradingView</h2>
+
+    <p>
+      Après avoir ouvert TradingView avec l’actif sélectionné, il faut ouvrir
+      <strong>Pine Editor</strong> pour coller, sauvegarder et appliquer le script Pine Script.
+    </p>
+
+    <div class="important">
+      TradingView ne permet pas à une page HTML externe de coller automatiquement
+      le script dans Pine Editor. Le collage doit être fait manuellement.
+    </div>
+
+    <div class="method-box">
+      <h3>Méthode actuelle recommandée</h3>
+
+      <ol class="method-steps">
+        <li>
+          Ouvrir TradingView avec l’actif choisi depuis le bouton de la page principale.
+        </li>
+
+        <li>
+          Vérifier que le graphique complet est ouvert.
+        </li>
+
+        <li>
+          Ouvrir <strong>Pine Editor</strong> dans l’interface TradingView.
+        </li>
+
+        <li>
+          Dans l’éditeur, sélectionner tout le contenu existant avec
+          <span class="keyboard">Ctrl + A</span>.
+        </li>
+
+        <li>
+          Coller le script copié avec
+          <span class="keyboard">Ctrl + V</span>.
+        </li>
+
+        <li>
+          Cliquer sur <strong>Save</strong> ou <strong>Sauvegarder</strong>.
+        </li>
+
+        <li>
+          Pour une première utilisation, cliquer sur <strong>Add to chart</strong>
+          ou <strong>Ajouter au graphique</strong>.
+        </li>
+
+        <li>
+          Après une modification du code, cliquer sur <strong>Update on chart</strong>
+          ou <strong>Mettre à jour sur le graphique</strong>, si ce bouton apparaît.
+        </li>
+
+        <li>
+          Si le bouton de mise à jour n’apparaît pas, supprimer l’ancien indicateur du graphique,
+          puis cliquer de nouveau sur <strong>Add to chart</strong>.
+        </li>
+      </ol>
+    </div>
+
+    <div class="guide-success">
+      <h3>Résumé rapide</h3>
+
+      <p>
+        La méthode à retenir est la suivante :
+      </p>
+
+      <div class="copy-zone">
+Ouvrir TradingView
+↓
+Ouvrir Pine Editor
+↓
+Ctrl + A
+↓
+Ctrl + V
+↓
+Save / Sauvegarder
+↓
+Add to chart / Ajouter au graphique
+      </div>
+    </div>
+
+    <div class="success">
+      <h3>Après modification du script</h3>
+
+      <p>
+        Si le script est déjà présent sur le graphique, il ne faut pas recharger la page.
+        Il faut faire :
+      </p>
+
+      <div class="copy-zone">
+Modifier le code
+↓
+Save / Sauvegarder
+↓
+Update on chart / Mettre à jour sur le graphique
+      </div>
+    </div>
+
+    <div class="warning">
+      Si l’icône ou l’onglet Pine Editor n’apparaît pas, il faut vérifier que tu es connecté
+      à ton compte TradingView, que tu utilises un ordinateur et que le graphique complet est bien ouvert.
+      Sur téléphone, Pine Editor peut être absent ou difficile à trouver.
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <p>
+    Page pédagogique consacrée à la création de stratégies TradingView avec Pine Script.
+  </p>
+  <p>
+    Auteur : Hocine Korichi, ingénieur. Avril 2026.
+  </p>
+</footer>
+
+<script>
+function copierScriptPine() {
+  const script = document.getElementById("script-pine-guide").innerText;
+
+  navigator.clipboard.writeText(script)
+    .then(function () {
+      alert("Script Pine Script copié. Collez-le maintenant dans Pine Editor sur TradingView.");
+    })
+    .catch(function () {
+      alert("La copie automatique a échoué. Sélectionnez le script manuellement.");
+    });
+}
+</script>
+
+</body>
+</html>

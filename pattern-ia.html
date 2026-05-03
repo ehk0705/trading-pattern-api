@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analyse IA du graphique - Pattern IA</title>
+
+    <style>
+        :root {
+            --bg: #07111f;
+            --panel: #0d1b2f;
+            --panel-2: #10243d;
+            --cyan: #00e5ff;
+            --yellow: #f0b90b;
+            --green: #00c853;
+            --red: #ff5252;
+            --text: #f5f7fb;
+            --muted: #aab7c4;
+            --border: rgba(255,255,255,0.12);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: radial-gradient(circle at top, #102a48 0, var(--bg) 45%, #040912 100%);
+            color: var(--text);
+        }
+
+        header {
+            padding: 16px;
+            border-bottom: 1px solid var(--border);
+            background: rgba(4, 9, 18, 0.88);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .top-bar {
+            max-width: 1200px;
+            margin: auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            color: var(--cyan);
+        }
+
+        nav {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        nav a {
+            color: var(--text);
+            text-decoration: none;
+            border: 1px solid var(--border);
+            padding: 8px 12px;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.05);
+            font-size: 14px;
+        }
+
+        nav a.active,
+        nav a:hover {
+            color: #041018;
+            background: var(--cyan);
+            border-color: var(--cyan);
+        }
+
+        main {
+            max-width: 1200px;
+            margin: auto;
+            padding: 18px;
+        }
+
+        .hero {
+            background: linear-gradient(135deg, rgba(0,229,255,0.12), rgba(240,185,11,0.10));
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 18px;
+            margin-bottom: 18px;
+        }
+
+        .hero h1 {
+            margin: 0 0 8px;
+            font-size: 26px;
+            color: var(--cyan);
+        }
+
+        .hero p {
+            margin: 0;
+            color: var(--muted);
+            line-height: 1.55;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 360px 1fr;
+            gap: 18px;
+        }
+
+        .card {
+            background: rgba(13, 27, 47, 0.92);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 16px;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.25);
+        }
+
+        .card h2 {
+            margin: 0 0 14px;
+            font-size: 18px;
+            color: var(--yellow);
+        }
+
+        label {
+            display: block;
+            margin: 12px 0 6px;
+            color: var(--cyan);
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        select,
+        input {
+            width: 100%;
+            background: #07111f;
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 10px;
+            font-size: 15px;
+            outline: none;
+        }
+
+        button {
+            width: 100%;
+            border: 0;
+            border-radius: 12px;
+            padding: 12px 14px;
+            font-weight: 800;
+            cursor: pointer;
+            margin-top: 14px;
+            font-size: 15px;
+        }
+
+        .btn-main {
+            background: var(--cyan);
+            color: #031018;
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.08);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .notice {
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.5;
+            margin-top: 12px;
+        }
+
+        .result-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 14px;
+            margin-bottom: 14px;
+        }
+
+        .signal {
+            font-size: 22px;
+            font-weight: 900;
+            padding: 10px 14px;
+            border-radius: 14px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid var(--border);
+        }
+
+        .signal.acheter {
+            color: var(--green);
+        }
+
+        .signal.vendre {
+            color: var(--red);
+        }
+
+        .signal.attendre {
+            color: var(--yellow);
+        }
+
+        .confidence {
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin: 14px 0;
+        }
+
+        .metric {
+            background: var(--panel-2);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 12px;
+        }
+
+        .metric span {
+            display: block;
+            color: var(--muted);
+            font-size: 13px;
+            margin-bottom: 6px;
+        }
+
+        .metric strong {
+            font-size: 20px;
+        }
+
+        .bloc {
+            margin-top: 14px;
+            padding: 14px;
+            border-radius: 14px;
+            background: rgba(255,255,255,0.045);
+            border: 1px solid var(--border);
+        }
+
+        .bloc h3 {
+            margin: 0 0 8px;
+            color: var(--cyan);
+            font-size: 16px;
+        }
+
+        .bloc p,
+        .bloc li {
+            color: var(--muted);
+            line-height: 1.55;
+            font-size: 14px;
+        }
+
+        .bloc ul {
+            margin: 8px 0 0;
+            padding-left: 20px;
+        }
+
+        .loading {
+            display: none;
+            color: var(--yellow);
+            margin-top: 12px;
+            font-weight: 700;
+        }
+
+        .error {
+            display: none;
+            color: var(--red);
+            margin-top: 12px;
+            line-height: 1.45;
+        }
+
+        .empty {
+            color: var(--muted);
+            line-height: 1.6;
+        }
+
+        footer {
+            max-width: 1200px;
+            margin: 18px auto 0;
+            padding: 18px;
+            color: var(--muted);
+            font-size: 13px;
+            text-align: center;
+        }
+
+        @media (max-width: 860px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hero h1 {
+                font-size: 22px;
+            }
+
+            .metrics {
+                grid-template-columns: 1fr;
+            }
+
+            nav a {
+                font-size: 13px;
+                padding: 7px 9px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<header>
+    <div class="top-bar">
+        <div class="logo">TRADING STATION <span>v2.0</span></div>
+        <nav>
+            <a href="index.html">Tableau principal</a>
+            <a href="pine-editor.html">Pine Editor</a>
+            <a href="pattern-ia.html" class="active">Analyse IA du graphique</a>
+            <a href="guide.html">Guide</a>
+        </nav>
+    </div>
+</header>
+
+<main>
+    <section class="hero">
+        <h1>Analyse IA du graphique</h1>
+        <p>
+            Cette page compare le segment actuel du marché avec des configurations historiques similaires.
+            Le résultat est probabiliste : il aide à décider, mais ne remplace pas le jugement humain.
+        </p>
+    </section>
+
+    <section class="grid">
+        <aside class="card">
+            <h2>Paramètres d’analyse</h2>
+
+            <label for="actif">Actif</label>
+            <select id="actif">
+                <option value="BINANCE:BTCUSDT">Bitcoin / USDT - Binance</option>
+                <option value="BINANCE:ETHUSDT">Ethereum / USDT - Binance</option>
+                <option value="BINANCE:SOLUSDT">Solana / USDT - Binance</option>
+                <option value="BINANCE:BNBUSDT">BNB / USDT - Binance</option>
+            </select>
+
+            <label for="intervalle">Intervalle</label>
+            <select id="intervalle">
+                <option value="5m">5 minutes</option>
+                <option value="15m">15 minutes</option>
+                <option value="1h" selected>1 heure</option>
+                <option value="4h">4 heures</option>
+                <option value="1d">1 jour</option>
+            </select>
+
+            <label for="longueurPattern">Nombre de bougies du pattern</label>
+            <input id="longueurPattern" type="number" value="40" min="20" max="120">
+
+            <label for="horizon">Horizon de résultat</label>
+            <input id="horizon" type="number" value="12" min="3" max="60">
+
+            <label for="seuil">Seuil de variation significative (%)</label>
+            <input id="seuil" type="number" value="1.5" min="0.2" max="10" step="0.1">
+
+            <button class="btn-main" onclick="analyserPatternIA()">Analyser le pattern</button>
+            <button class="btn-secondary" onclick="remplirDepuisIndex()">Reprendre les paramètres du graphique</button>
+
+            <div id="loading" class="loading">Analyse en cours...</div>
+            <div id="error" class="error"></div>
+
+            <p class="notice">
+                Note : cette version utilise les données Binance. Pour l’or, les actions ou le Nasdaq,
+                il faudra ajouter une API de marché comme Twelve Data, Polygon, Alpha Vantage ou un fournisseur équivalent.
+            </p>
+        </aside>
+
+        <section class="card">
+            <h2>Résultat</h2>
+
+            <div id="zone-resultat" class="empty">
+                Lance l’analyse pour obtenir une comparaison historique du segment actuel.
+            </div>
+        </section>
+    </section>
+</main>
+
+<footer>
+    Page développée par Hocine Korichi. Avril 2026, Tous droits réservés.
+</footer>
+
+<script src="assets/js/pattern-ia.js"></script>
+</body>
+</html>

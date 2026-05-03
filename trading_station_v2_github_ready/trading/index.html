@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trading Station v2.0</title>
+    <link rel="stylesheet" href="style/style-trading.css">
+    <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+</head>
+<body>
+    <header class="top-bar">
+        <div class="logo">TRADING STATION <span>v2.0</span></div>
+        <div class="search-area">
+            <label>ACTIF : </label>
+            <select id="asset-selector">
+                <option value="BINANCE:BTCUSDT">BITCOIN (BTC/USDT)</option>
+                <option value="BINANCE:ETHUSDT">ETHEREUM (ETH/USDT)</option>
+                <option value="OANDA:XAUUSD">OR (GOLD)</option>
+                <option value="FOREXCOM:SPX500">S&P 500</option>
+                <option value="BINANCE:SOLUSDT">SOLANA</option>
+            </select>
+        </div>
+    </header>
+
+    <main class="main-layout">
+        <section class="chart-section">
+            <div id="tv_chart_container"></div>
+        </section>
+        
+        <aside class="analysis-sidebar">
+            <div class="card">
+                <h3>STATUT</h3>
+                <div id="signal-box" class="signal-display neutral">ANALYSE EN COURS...</div>
+            </div>
+            <div class="card">
+                <h3>INFOS PRO</h3>
+                <p>Moteur : <span class="active">Connecté</span></p>
+                <p>Update : <span class="active">Temps Réel</span></p>
+            </div>
+        </aside>
+    </main>
+
+    <!-- Chargement des scripts dans l'ordre critique pour GitHub -->
+    <script src="js/moteur-analyse.js"></script>
+    <script src="js/data-feed.js"></script>
+    <script src="js/main-app.js"></script>
+</body>
+</html>

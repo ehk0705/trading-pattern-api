@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trading Station v2.0</title>
+
+    <link rel="stylesheet" href="style/style-trading.css">
+    <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+
+    <style>
+        .brand-top {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        .btn-tradingview {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+
+            background: linear-gradient(135deg, #facc15, #f59e0b);
+            color: #111827;
+
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            padding: 9px 16px;
+            border-radius: 999px;
+
+            font-weight: 800;
+            font-size: 13px;
+            letter-spacing: 0.3px;
+
+            cursor: pointer;
+            white-space: nowrap;
+
+            box-shadow: 0 6px 16px rgba(250, 204, 21, 0.35);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+        }
+
+        .btn-tradingview:hover {
+            background: linear-gradient(135deg, #fde047, #facc15);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 22px rgba(250, 204, 21, 0.45);
+        }
+
+        .btn-tradingview:active {
+            transform: translateY(0);
+            box-shadow: 0 4px 10px rgba(250, 204, 21, 0.3);
+        }
+
+        .tv-icon {
+            font-size: 16px;
+            line-height: 1;
+        }
+
+        @media (max-width: 700px) {
+            .brand-top {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+
+            .btn-tradingview {
+                font-size: 12px;
+                padding: 8px 13px;
+            }
+
+            .tv-icon {
+                font-size: 15px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header class="top-bar">
+
+    <div class="brand-group">
+        <div class="brand-top">
+            <div class="logo">TRADING STATION <span>v2.0</span></div>
+
+            <button class="btn-tradingview" onclick="ouvrirTradingViewAvecIndicateur()">
+                <span class="tv-icon">📈</span>
+                <span>Ouvrir dans TradingView</span>
+            </button>
+        </div>
+
+        <div class="credits">Développé par Hocine Korichi, à l'aide de Vibe Coding</div>
+    </div>
+
+    <div class="search-area">
+        <div class="input-group">
+           <label for="asset-selector" style="font-weight: bold; color: cyan;">
+				ACTIF :
+		   </label>
+
+            <select id="asset-selector">
+                <optgroup label="Cryptomonnaies">
+                    <option value="BINANCE:BTCUSDT">Bitcoin / USDT</option>
+                    <option value="BINANCE:ETHUSDT">Ethereum / USDT</option>
+                    <option value="BINANCE:SOLUSDT">Solana / USDT</option>
+                </optgroup>
+
+                <optgroup label="Métaux & Indices">
+                    <option value="OANDA:XAUUSD">Or (XAUUSD)</option>
+                    <option value="SP:SPX">S&amp;P 500</option>
+                    <option value="TVC:DXY">Dollar Index (DXY)</option>
+                </optgroup>
+            </select>
+        </div>
+
+        <div class="input-group">
+<label for="asset-selector" style="font-weight: bold; color: cyan;">
+    INDICATEUR:
+</label>
+
+            <select id="indicator-selector">
+                <optgroup label="STRATÉGIES CUSTOM">
+                    <option value="CUSTOM:BTC_CYCLE">INDICATEUR BTC | CYCLE | INDEX</option>
+                    <option value="CUSTOM:ELITE_V2">INDICATOR ELITE V2 (ALARM)</option>
+                </optgroup>
+
+                <optgroup label="INDICATEURS TECHNIQUES">
+                    <option value="RSI">RSI</option>
+                    <option value="MACD">MACD</option>
+                    <option value="EMA">EMA</option>
+                    <option value="SMA">SMA</option>
+                    <option value="SUPERTREND">Supertrend</option>
+                    <option value="BOLLINGER">Bandes de Bollinger</option>
+                </optgroup>
+            </select>
+        </div>
+    </div>
+
+</header>
+
+<main class="main-layout">
+
+    <section class="chart-section">
+        <div id="tv_chart_container"></div>
+    </section>
+
+    <aside class="analysis-sidebar">
+
+        <div class="card">
+            <h3>STATUT MOTEUR</h3>
+            <div id="signal-box" class="signal-display neutral">ANALYSE EN COURS...</div>
+        </div>
+
+        <div class="card" id="info-custom" style="display:none;">
+            <h3 style="color: #f0b90b;">NOTE INDICATEUR</h3>
+            <p id="custom-text"></p>
+
+            <a href="create-strategy.html" target="_blank" class="btn-pine">
+                Aide à la création de stratégies TradingView
+            </a>
+        </div>
+
+        <div class="card">
+            <h3>INFOS SYSTÈME</h3>
+            <p>Moteur : Connecté</p>
+            <p>Flux : Temps Réel</p>
+        </div>
+
+    </aside>
+
+</main>
+
+<script>
+function ouvrirTradingViewAvecIndicateur() {
+    const selectActif = document.getElementById("asset-selector");
+    const selectIndicateur = document.getElementById("indicator-selector");
+
+    if (!selectActif) {
+        alert("Sélecteur d’actif introuvable.");
+        return;
+    }
+
+    if (!selectIndicateur) {
+        alert("Sélecteur d’indicateur introuvable.");
+        return;
+    }
+
+    const symbole = selectActif.value;
+    const indicateur = selectIndicateur.value;
+
+    if (!symbole) {
+        alert("Aucun actif sélectionné.");
+        return;
+    }
+
+    if (!indicateur) {
+        alert("Aucun indicateur sélectionné.");
+        return;
+    }
+
+    const scriptPine = genererScriptPine(indicateur);
+    const urlTradingView = "https://www.tradingview.com/chart/?symbol=" + encodeURIComponent(symbole);
+
+    if (scriptPine) {
+        navigator.clipboard.writeText(scriptPine)
+            .then(function () {
+                alert(
+                    "Actif sélectionné : " + symbole + "\n" +
+                    "Indicateur sélectionné : " + indicateur + "\n\n" +
+                    "Le script Pine Script a été copié.\n\n" +
+                    "TradingView va maintenant s’ouvrir.\n" +
+                    "Collez ensuite le script dans Pine Editor."
+                );
+
+                window.open(urlTradingView, "_blank");
+            })
+            .catch(function () {
+                alert(
+                    "TradingView va s’ouvrir avec l’actif sélectionné : " + symbole + ".\n\n" +
+                    "Impossible de copier automatiquement le script Pine Script.\n" +
+                    "Copiez-le manuellement depuis votre page de stratégie."
+                );
+
+                window.open(urlTradingView, "_blank");
+            });
+    } else {
+        alert(
+            "TradingView va s’ouvrir avec l’actif sélectionné : " + symbole + ".\n\n" +
+            "Indicateur sélectionné : " + indicateur + "\n\n" +
+            "Cet indicateur est personnalisé. TradingView ne permet pas de le charger automatiquement par URL.\n" +
+            "Il faut l’ajouter manuellement dans TradingView ou le coller dans Pine Editor."
+        );
+
+        window.open(urlTradingView, "_blank");
+    }
+}
+
+function genererScriptPine(indicateur) {
+    if (indicateur === "RSI") {
+        return `//@version=5
+indicator("RSI pédagogique", overlay=false)
+
+rsi = ta.rsi(close, 14)
+
+plot(rsi, title="RSI", color=color.blue)
+hline(70, "Zone de surachat")
+hline(30, "Zone de survente")
+hline(50, "Zone neutre")`;
+    }
+
+    if (indicateur === "MACD") {
+        return `//@version=5
+indicator("MACD pédagogique", overlay=false)
+
+[macdLine, signalLine, histLine] = ta.macd(close, 12, 26, 9)
+
+plot(macdLine, title="MACD", color=color.blue)
+plot(signalLine, title="Signal", color=color.orange)
+plot(histLine, title="Histogramme", style=plot.style_columns)`;
+    }
+
+    if (indicateur === "EMA") {
+        return `//@version=5
+indicator("EMA 20 / EMA 50 pédagogique", overlay=true)
+
+ema20 = ta.ema(close, 20)
+ema50 = ta.ema(close, 50)
+
+plot(ema20, title="EMA 20", color=color.green)
+plot(ema50, title="EMA 50", color=color.red)`;
+    }
+
+    if (indicateur === "SMA") {
+        return `//@version=5
+indicator("SMA 50 / SMA 200 pédagogique", overlay=true)
+
+sma50 = ta.sma(close, 50)
+sma200 = ta.sma(close, 200)
+
+plot(sma50, title="SMA 50", color=color.blue)
+plot(sma200, title="SMA 200", color=color.orange)`;
+    }
+
+    if (indicateur === "SUPERTREND") {
+        return `//@version=5
+indicator("Supertrend pédagogique", overlay=true)
+
+facteur = input.float(3.0, title="Facteur")
+periodeAtr = input.int(10, title="Période ATR")
+
+[supertrend, direction] = ta.supertrend(facteur, periodeAtr)
+
+plot(supertrend, title="Supertrend", color=direction < 0 ? color.green : color.red)`;
+    }
+
+    if (indicateur === "BOLLINGER") {
+        return `//@version=5
+indicator("Bandes de Bollinger pédagogiques", overlay=true)
+
+periode = input.int(20, title="Période")
+multiplicateur = input.float(2.0, title="Multiplicateur")
+
+base = ta.sma(close, periode)
+ecart = multiplicateur * ta.stdev(close, periode)
+
+bandeHaute = base + ecart
+bandeBasse = base - ecart
+
+plot(base, title="Moyenne", color=color.blue)
+plot(bandeHaute, title="Bande haute", color=color.orange)
+plot(bandeBasse, title="Bande basse", color=color.orange)`;
+    }
+
+    return "";
+}
+</script>
+
+<script src="js/moteur-analyse.js"></script>
+<script src="js/data-feed.js"></script>
+<script src="js/main-app.js"></script>
+
+</body>
+</html>

@@ -1,14 +1,14 @@
 {
-  "name": "trading-pattern-api",
+  "name": "trading-pattern-ia",
   "version": "1.0.0",
-  "description": "API Node.js pour analyse trading",
+  "description": "Module d'analyse IA des patterns pour Trading Station",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
     "cors": "^2.8.5",
-    "express": "^4.18.2"
+    "express": "^4.18.3"
   },
   "engines": {
     "node": ">=18"

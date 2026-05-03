@@ -1,0 +1,642 @@
+<style>
+    body {
+        background: #020617;
+        color: #e5e7eb;
+    }
+
+    .top-bar {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        flex-wrap: wrap;
+        padding: 2px 6px 3px 6px;
+        margin-bottom: 5px;
+        position: relative;
+        z-index: 10;
+        overflow: visible;
+        background: #0f172a;
+    }
+
+    .brand-group {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+
+        width: auto;
+        max-width: 180px;
+
+        margin: 0;
+        padding: 1px 0 0 0;
+
+        line-height: 1;
+        gap: 0;
+        overflow: visible;
+    }
+
+    .brand-top {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 2px;
+        flex-wrap: wrap;
+        width: auto;
+        margin: 0;
+        padding: 0;
+        overflow: visible;
+    }
+
+    .logo {
+        font-size: 8px;
+        font-weight: 900;
+        line-height: 1.15;
+        white-space: nowrap;
+        text-align: center;
+
+        margin: 0;
+        padding: 1px 0 0 0;
+
+        overflow: visible;
+        color: #ffffff;
+    }
+
+    .logo span {
+        font-size: 6.5px;
+        line-height: 1.15;
+        color: #22d3ee;
+    }
+
+    .credits {
+        font-size: 5px;
+        line-height: 1;
+        color: #ffffff;
+        opacity: 1;
+        white-space: nowrap;
+        text-align: center;
+
+        margin: 0;
+        padding: 0;
+
+        overflow: visible;
+    }
+
+    /* Zone des boutons, actifs et indicateurs */
+    .search-area {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        flex-wrap: wrap;
+        width: auto;
+        margin-top: 0;
+        margin-bottom: 6px;
+        transform: none;
+        overflow: visible;
+    }
+
+    .input-group {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        white-space: nowrap;
+        margin: 0;
+        padding: 0;
+    }
+
+    .input-group label,
+    .search-area label {
+        font-size: 9px;
+        font-weight: bold;
+        color: cyan;
+        margin: 0;
+        padding: 0;
+        white-space: nowrap;
+        line-height: 1;
+    }
+
+    .input-group select,
+    .search-area select {
+        height: 24px;
+        max-width: 140px;
+        font-size: 9px;
+        padding: 1px 5px;
+        border-radius: 5px;
+        box-sizing: border-box;
+        background: #020617;
+        color: #ffffff;
+        border: 1px solid rgba(148, 163, 184, 0.55);
+    }
+
+    .btn-tradingview,
+    .btn-pine-action,
+    .btn-pine,
+    .btn-copy,
+    .search-area button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 3px;
+
+        height: 21px;
+        padding: 0 5px;
+        border-radius: 999px;
+
+        border: 1px solid rgba(255, 255, 255, 0.25);
+
+        font-weight: 800;
+        font-size: 7.5px;
+        letter-spacing: 0.1px;
+
+        cursor: pointer;
+        white-space: nowrap;
+        text-decoration: none;
+        line-height: 1;
+
+        transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+
+    .btn-tradingview {
+        background: linear-gradient(135deg, #facc15, #f59e0b);
+        color: #111827;
+        box-shadow: 0 4px 10px rgba(250, 204, 21, 0.28);
+    }
+
+    .btn-pine-action,
+    .btn-pine,
+    .btn-copy {
+        background: linear-gradient(135deg, #06b6d4, #0891b2);
+        color: #ffffff;
+        box-shadow: 0 4px 10px rgba(6, 182, 212, 0.22);
+    }
+
+    .btn-tradingview:hover,
+    .btn-pine-action:hover,
+    .btn-pine:hover,
+    .btn-copy:hover,
+    .search-area button:hover {
+        transform: translateY(-1px);
+    }
+
+    .tv-icon {
+        font-size: 8px;
+        line-height: 1;
+    }
+
+    /* Graphique descendu */
+    .main-layout {
+        margin-top: 32px;
+        position: relative;
+        z-index: 1;
+        background: #020617;
+    }
+
+    .chart-section {
+        clear: both;
+        margin-top: 26px;
+        width: 100%;
+        position: relative;
+        z-index: 1;
+        background: #020617;
+    }
+
+    .analysis-sidebar {
+        width: 100%;
+        background: #020617;
+    }
+
+    .card {
+        background: rgba(15, 23, 42, 0.95);
+        border: 1px solid rgba(34, 211, 238, 0.25);
+        color: #e5e7eb;
+    }
+
+    .pine-generator-section {
+        margin: 10px;
+        padding: 12px;
+        border-radius: 14px;
+        background: rgba(15, 23, 42, 0.95);
+        border: 1px solid rgba(34, 211, 238, 0.35);
+        color: #e5e7eb;
+    }
+
+    .pine-generator-section h2 {
+        margin-top: 0;
+        color: #22d3ee;
+        font-size: 16px;
+    }
+
+    .pine-generator-section p {
+        font-size: 12px;
+        line-height: 1.5;
+        color: #d1d5db;
+    }
+
+    .pine-steps {
+        margin: 10px 0;
+        padding-left: 20px;
+        font-size: 12px;
+        line-height: 1.6;
+    }
+
+    .pine-actions {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin: 10px 0;
+    }
+
+    .pine-script-box {
+        width: 100%;
+        min-height: 230px;
+        resize: vertical;
+
+        background: #020617;
+        color: #d9f99d;
+
+        border: 1px solid rgba(132, 204, 22, 0.45);
+        border-radius: 12px;
+
+        padding: 12px;
+        font-family: Consolas, Monaco, monospace;
+        font-size: 12px;
+        line-height: 1.4;
+
+        box-sizing: border-box;
+    }
+
+    .pine-warning {
+        margin-top: 10px;
+        padding: 10px;
+        border-radius: 10px;
+        background: rgba(250, 204, 21, 0.12);
+        border: 1px solid rgba(250, 204, 21, 0.35);
+        color: #fde68a;
+        font-size: 12px;
+        line-height: 1.4;
+    }
+
+    /* Tablettes */
+    @media (max-width: 950px) {
+        .top-bar {
+            align-items: center;
+            justify-content: center;
+            padding: 2px 6px 3px 6px;
+            gap: 4px;
+            margin-bottom: 5px;
+            overflow: visible;
+            background: #0f172a;
+        }
+
+        .brand-group {
+            width: auto;
+            max-width: 180px;
+            margin: 0;
+            padding: 1px 0 0 0;
+            line-height: 1;
+            gap: 0;
+            overflow: visible;
+        }
+
+        .brand-top {
+            width: auto;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 2px;
+            overflow: visible;
+        }
+
+        .logo {
+            font-size: 8px;
+            line-height: 1.15;
+            padding: 1px 0 0 0;
+            overflow: visible;
+        }
+
+        .logo span {
+            font-size: 6.5px;
+            line-height: 1.15;
+        }
+
+        .credits {
+            font-size: 5px;
+            line-height: 1;
+            color: #ffffff;
+            overflow: visible;
+        }
+
+        .search-area {
+            width: auto;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 0;
+            margin-bottom: 6px;
+            transform: none;
+        }
+
+        .input-group select,
+        .search-area select {
+            max-width: 140px;
+        }
+
+        .main-layout {
+            margin-top: 34px;
+            background: #020617;
+        }
+
+        .chart-section {
+            margin-top: 28px;
+            background: #020617;
+        }
+    }
+
+    /* Smartphones */
+    @media (max-width: 600px) {
+        .top-bar {
+            padding: 2px 5px 3px 5px;
+            gap: 3px;
+            margin-bottom: 5px;
+            overflow: visible;
+            background: #0f172a;
+        }
+
+        .brand-group {
+            max-width: 170px;
+            line-height: 1;
+            gap: 0;
+            padding-top: 1px;
+            overflow: visible;
+        }
+
+        .brand-top {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+            width: auto;
+            overflow: visible;
+        }
+
+        .logo {
+            font-size: 7.5px;
+            line-height: 1.15;
+            text-align: center;
+            margin: 0;
+            padding: 1px 0 0 0;
+            overflow: visible;
+        }
+
+        .logo span {
+            font-size: 6px;
+            line-height: 1.15;
+        }
+
+        .credits {
+            font-size: 4.8px;
+            line-height: 1;
+            text-align: center;
+            white-space: nowrap;
+            color: #ffffff;
+            overflow: visible;
+        }
+
+        .search-area {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            width: auto;
+            flex-wrap: wrap;
+            margin-top: 0;
+            margin-bottom: 6px;
+            transform: none;
+            overflow: visible;
+        }
+
+        .input-group {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+        }
+
+        .input-group label,
+        .search-area label {
+            font-size: 8px;
+        }
+
+        .input-group select,
+        .search-area select {
+            height: 23px;
+            max-width: 110px;
+            font-size: 8px;
+            padding: 1px 4px;
+        }
+
+        .btn-tradingview,
+        .btn-pine-action,
+        .btn-pine,
+        .btn-copy,
+        .search-area button {
+            height: 20px;
+            padding: 0 4px;
+            font-size: 7px;
+            gap: 2px;
+        }
+
+        .tv-icon {
+            font-size: 7.5px;
+        }
+
+        .main-layout {
+            display: flex;
+            flex-direction: column;
+            margin-top: 34px;
+            background: #020617;
+        }
+
+        .chart-section {
+            clear: both;
+            width: 100%;
+            margin-top: 30px;
+            background: #020617;
+        }
+
+        .analysis-sidebar {
+            width: 100%;
+            background: #020617;
+        }
+
+        .pine-generator-section {
+            margin: 8px;
+            padding: 12px;
+        }
+
+        .pine-generator-section h2 {
+            font-size: 16px;
+        }
+
+        .pine-generator-section p,
+        .pine-steps {
+            font-size: 12px;
+        }
+
+        .pine-actions {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .pine-script-box {
+            min-height: 260px;
+            font-size: 11px;
+        }
+    }
+
+    /* Très petits téléphones */
+    @media (max-width: 380px) {
+        .top-bar {
+            padding: 2px 4px 3px 4px;
+            gap: 2px;
+            overflow: visible;
+            background: #0f172a;
+        }
+
+        .brand-group {
+            max-width: 150px;
+            line-height: 1;
+            padding-top: 1px;
+            overflow: visible;
+        }
+
+        .logo {
+            font-size: 7px;
+            line-height: 1.15;
+            padding-top: 1px;
+            overflow: visible;
+        }
+
+        .logo span {
+            font-size: 5.5px;
+            line-height: 1.15;
+        }
+
+        .credits {
+            font-size: 4.5px;
+            line-height: 1;
+            color: #ffffff;
+        }
+
+        .search-area {
+            gap: 3px;
+            margin-top: 0;
+            margin-bottom: 6px;
+            transform: none;
+        }
+
+        .input-group {
+            gap: 3px;
+        }
+
+        .input-group label,
+        .search-area label {
+            font-size: 7.5px;
+        }
+
+        .input-group select,
+        .search-area select {
+            height: 22px;
+            max-width: 100px;
+            font-size: 7.5px;
+            padding: 1px 3px;
+        }
+
+        .btn-tradingview,
+        .btn-pine-action,
+        .btn-pine,
+        .btn-copy,
+        .search-area button {
+            height: 19px;
+            padding: 0 4px;
+            font-size: 6.8px;
+            gap: 2px;
+        }
+
+        .tv-icon {
+            font-size: 7px;
+        }
+
+        .main-layout {
+            margin-top: 36px;
+            background: #020617;
+        }
+
+        .chart-section {
+            margin-top: 32px;
+            background: #020617;
+        }
+    }
+</style>
+/* Correction forte : empêcher le graphique d'empiéter sur les boutons */
+.top-bar {
+    position: relative !important;
+    z-index: 1000 !important;
+    margin-bottom: 20px !important;
+}
+
+.search-area {
+    position: relative !important;
+    z-index: 1001 !important;
+    margin-bottom: 18px !important;
+}
+
+.main-layout {
+    position: relative !important;
+    z-index: 1 !important;
+    margin-top: 70px !important;
+    padding-top: 10px !important;
+    clear: both !important;
+}
+
+.chart-section {
+    position: relative !important;
+    z-index: 1 !important;
+    margin-top: 40px !important;
+    padding-top: 10px !important;
+    clear: both !important;
+}
+
+#tv_chart_container {
+    position: relative !important;
+    z-index: 1 !important;
+    margin-top: 20px !important;
+}
+
+@media (max-width: 600px) {
+    .top-bar {
+        margin-bottom: 24px !important;
+    }
+
+    .search-area {
+        margin-bottom: 22px !important;
+    }
+
+    .main-layout {
+        margin-top: 90px !important;
+        padding-top: 12px !important;
+    }
+
+    .chart-section {
+        margin-top: 50px !important;
+        padding-top: 12px !important;
+    }
+
+    #tv_chart_container {
+        margin-top: 24px !important;
+    }
+}
+

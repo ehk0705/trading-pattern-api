@@ -1,0 +1,1178 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analyse de stratégie TradingView</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #0b1020;
+            color: #ffffff;
+        }
+
+        header {
+            background: #111827;
+            border-bottom: 1px solid #243044;
+            padding: 14px 25px;
+            text-align: center;
+        }
+
+        header h1 {
+            margin: 0;
+            color: #00e5ff;
+            font-size: 26px;
+        }
+
+        header p {
+            margin: 6px 0 0;
+            color: #cbd5e1;
+            font-size: 14px;
+        }
+
+        nav {
+            background: #0f172a;
+            padding: 8px;
+            text-align: center;
+            border-bottom: 1px solid #243044;
+        }
+
+        nav a {
+            color: #facc15;
+            text-decoration: none;
+            margin: 0 10px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        nav a:hover {
+            text-decoration: underline;
+        }
+
+        main {
+            width: 95%;
+            max-width: 1350px;
+            margin: 12px auto 25px auto;
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+            align-items: start;
+        }
+
+        .card {
+            background: #111827;
+            border: 1px solid #243044;
+            border-radius: 12px;
+            padding: 14px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.35);
+        }
+
+        .card h2 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            color: #00e5ff;
+            font-size: 20px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 14px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            color: #facc15;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        select,
+        input,
+        textarea {
+            width: 100%;
+            padding: 10px;
+            background: #020617;
+            color: #ffffff;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        textarea {
+            min-height: 90px;
+            resize: vertical;
+        }
+
+        .button-row,
+        .button-row-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .button-row {
+            margin-top: 12px;
+        }
+
+        .button-row-actions {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #243044;
+        }
+
+        button,
+        .btn-link {
+            border: none;
+            padding: 9px 11px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 13px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            min-height: 38px;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: #00e5ff;
+            color: #001018;
+        }
+
+        .btn-secondary {
+            background: #facc15;
+            color: #111827;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: #ffffff;
+        }
+
+        .btn-dark {
+            background: #334155;
+            color: #ffffff;
+        }
+
+        .btn-pine-action {
+            background: #16a34a;
+            color: #ffffff;
+        }
+
+        .btn-pine-view {
+            background: #2563eb;
+            color: #ffffff;
+        }
+
+        .tv-icon {
+            margin-right: 2px;
+        }
+
+        button:hover,
+        .btn-link:hover {
+            opacity: 0.85;
+        }
+
+        .chart-box {
+            height: 430px;
+            background: #020617;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        #tradingview-widget {
+            width: 100%;
+            height: 100%;
+        }
+
+        .result-card-inline {
+            margin-top: 16px;
+        }
+
+        .result-card-inline h2 {
+            margin-top: 0;
+        }
+
+        .result-box {
+            background: #020617;
+            border: 1px solid #334155;
+            border-radius: 10px;
+            padding: 14px;
+            min-height: 320px;
+            max-height: 620px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            font-family: Consolas, monospace;
+            font-size: 14px;
+            color: #d1d5db;
+        }
+
+        .status {
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+
+        .status.neutral {
+            background: #334155;
+            color: #ffffff;
+        }
+
+        .status.ok {
+            background: #064e3b;
+            color: #86efac;
+        }
+
+        .status.error {
+            background: #7f1d1d;
+            color: #fecaca;
+        }
+
+        .status.warning {
+            background: #713f12;
+            color: #fde68a;
+        }
+
+        .note {
+            color: #cbd5e1;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .info-categorie {
+            margin-top: 14px;
+            padding: 12px;
+            background: #020617;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            color: #cbd5e1;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .info-categorie strong {
+            color: #00e5ff;
+        }
+
+        .label-categorie,
+        .label-avance {
+            color: #00e5ff;
+            font-weight: bold;
+        }
+
+        #actifsConnexes {
+            min-height: auto;
+        }
+
+        footer {
+            margin-top: 30px;
+            padding: 18px;
+            text-align: center;
+            background: #111827;
+            color: #cbd5e1;
+            border-top: 1px solid #243044;
+            font-size: 13px;
+        }
+
+        @media (max-width: 900px) {
+            .layout {
+                grid-template-columns: 1fr;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .chart-box {
+                height: 360px;
+            }
+
+            header h1 {
+                font-size: 22px;
+            }
+
+            .result-box {
+                min-height: 300px;
+                max-height: 520px;
+            }
+
+            .button-row button,
+            .button-row-actions button {
+                flex: 1 1 100%;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>Analyse de stratégie TradingView</h1>
+    <p>Analyse des paramètres de marché, des indicateurs, des catégories Bitcoin, des snapshots et des multi-charts.</p>
+</header>
+
+<nav>
+    <a href="index.html">Accueil</a>
+    <a href="https://www.tradingview.com/chart/" target="_blank">TradingView</a>
+    <a href="create-strategy.html">Comment créer une stratégie</a>
+</nav>
+
+<main>
+
+    <section class="layout">
+
+        <div>
+            <div class="card">
+                <h2>Graphique TradingView</h2>
+
+                <div class="chart-box">
+                    <div id="tradingview-widget"></div>
+                </div>
+
+                <div class="button-row">
+                    <button class="btn-pine-action" onclick="afficherScriptPine()">
+                        <span class="tv-icon">🧩</span>
+                        <span>Générer Pine</span>
+                    </button>
+
+                    <button class="btn-pine-view" onclick="afficherPineScript()">
+                        <span class="tv-icon">👁️</span>
+                        <span>Afficher Pine Script</span>
+                    </button>
+
+                    <button class="btn-pine-action" onclick="copierScriptPine()">
+                        <span class="tv-icon">📋</span>
+                        <span>Copier Pine</span>
+                    </button>
+
+                    <button 
+                        class="btn-secondary" 
+                        onclick="ouvrirTradingView()"
+                        title="Recommandation : ta page HTML → Node.js → génération Pine Script → copier-coller dans Pine Editor"
+                    >
+                        Ouvrir dans TradingView
+                    </button>
+
+                    <button class="btn-dark" onclick="rafraichirGraphique()">
+                        Rafraîchir le graphique
+                    </button>
+                </div>
+
+                <div class="button-row-actions">
+                    <button class="btn-primary" onclick="analyserStrategie()">
+                        Analyser la stratégie
+                    </button>
+
+                    <button class="btn-secondary" onclick="testerServeur()">
+                        Tester le serveur
+                    </button>
+
+                    <button class="btn-danger" onclick="viderResultats()">
+                        Effacer
+                    </button>
+                </div>
+            </div>
+
+            <div class="card result-card-inline">
+                <h2>Résultat de l’analyse</h2>
+
+                <div id="resultatAnalyse" class="result-box">
+Aucune analyse lancée.
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Paramètres d’analyse</h2>
+
+            <div id="etatServeur" class="status neutral">
+                Serveur non testé
+            </div>
+
+            <div class="form-grid">
+
+                <div>
+                    <label for="actif">Actif</label>
+                    <select id="actif" onchange="mettreAJourActifsConnexes(); rafraichirGraphique();">
+                        <option value="BINANCE:BTCUSDT">Bitcoin / USDT</option>
+                        <option value="COINBASE:BTCUSD">Bitcoin / USD - Coinbase</option>
+                        <option value="BINANCE:ETHUSDT">Ethereum / USDT</option>
+                        <option value="OANDA:XAUUSD">Or / Dollar - XAUUSD</option>
+                        <option value="NASDAQ:AAPL">Apple</option>
+                        <option value="NASDAQ:TSLA">Tesla</option>
+                        <option value="NASDAQ:NVDA">Nvidia</option>
+                        <option value="NASDAQ:MSFT">Microsoft</option>
+                        <option value="NASDAQ:GOOGL">Google</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="intervalle">Intervalle</label>
+                    <select id="intervalle" onchange="rafraichirGraphique()">
+                        <option value="1">1 minute</option>
+                        <option value="5">5 minutes</option>
+                        <option value="15">15 minutes</option>
+                        <option value="30">30 minutes</option>
+                        <option value="60">1 heure</option>
+                        <option value="240">4 heures</option>
+                        <option value="D" selected>1 jour</option>
+                        <option value="W">1 semaine</option>
+                        <option value="M">1 mois</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="indicateur">Indicateur principal</label>
+                    <select id="indicateur" onchange="rafraichirGraphique()">
+                        <option value="RSI">RSI</option>
+                        <option value="MACD">MACD</option>
+                        <option value="EMA">EMA</option>
+                        <option value="SMA">Moyenne mobile simple</option>
+                        <option value="SUPERTREND">Supertrend</option>
+                        <option value="VOLUME">Volume</option>
+                        <option value="PRICE_ACTION">Price Action</option>
+                        <option value="LIQUIDITY">Zones de liquidité</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="strategie">Type de stratégie</label>
+                    <select id="strategie">
+                        <option value="suivi_tendance">Suivi de tendance</option>
+                        <option value="retournement">Retournement</option>
+                        <option value="cassure">Cassure de niveau</option>
+                        <option value="scalping">Scalping</option>
+                        <option value="swing">Swing trading</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="categorieAnalyse" class="label-categorie">Catégorie d’analyse</label>
+                    <select id="categorieAnalyse" onchange="mettreAJourDescriptionCategorie()">
+                        <option value="macroeconomie">Macroéconomie</option>
+                        <option value="monnaie_bitcoin">Monnaie Bitcoin</option>
+                        <option value="donnees_on_chain">Données on-chain</option>
+                        <option value="minage">Minage</option>
+                        <option value="analyse_technique">Analyse technique</option>
+                        <option value="derives">Dérivés</option>
+                        <option value="liquidite_marche">Liquidité de marché</option>
+                        <option value="institutionnel">Institutionnel</option>
+                        <option value="sentiment">Sentiment</option>
+                        <option value="reglementation_risques">Réglementation et risques</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="modeAnalyseAvancee" class="label-avance">Mode d’analyse avancée</label>
+                    <select id="modeAnalyseAvancee" onchange="mettreAJourActifsConnexes()">
+                        <option value="simple">Analyse simple</option>
+                        <option value="snapshots">Snapshots</option>
+                        <option value="multi_charts">Multi-charts</option>
+                        <option value="carnet_ordres">Carnet des ordres</option>
+                        <option value="complet">Analyse complète</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="actifsConnexes" class="label-avance">Actif connexe à analyser</label>
+                    <select id="actifsConnexes"></select>
+                </div>
+
+                <div>
+                    <label for="capital">Capital initial</label>
+                    <input type="number" id="capital" value="1000">
+                </div>
+
+                <div>
+                    <label for="risque">Risque par position (%)</label>
+                    <input type="number" id="risque" value="1" step="0.1">
+                </div>
+
+                <div>
+                    <label for="stopLoss">Stop loss (%)</label>
+                    <input type="number" id="stopLoss" value="2" step="0.1">
+                </div>
+
+                <div>
+                    <label for="takeProfit">Take profit (%)</label>
+                    <input type="number" id="takeProfit" value="4" step="0.1">
+                </div>
+
+                <div>
+                    <label for="levier">Levier</label>
+                    <input type="number" id="levier" value="1" step="1">
+                </div>
+
+                <div>
+                    <label for="sens">Sens de trading</label>
+                    <select id="sens">
+                        <option value="achat_vente">Achat et vente</option>
+                        <option value="achat">Achat seulement</option>
+                        <option value="vente">Vente seulement</option>
+                    </select>
+                </div>
+
+            </div>
+
+            <div id="descriptionCategorie" class="info-categorie">
+                <strong>Catégorie choisie :</strong> Macroéconomie.
+                Taux, inflation, liquidité mondiale, dollar, obligations, bilan de la Fed.
+            </div>
+
+            <div id="descriptionAnalyseAvancee" class="info-categorie">
+                <strong>Analyse avancée :</strong> les actifs connexes sélectionnés seront transmis à Node.js avec l’actif principal.
+            </div>
+
+            <div style="margin-top: 14px;">
+                <label for="notes">Notes personnelles</label>
+                <textarea id="notes" placeholder="Exemple : surveiller les mèches, les zones de liquidité, les supports, les résistances, les données on-chain ou la macroéconomie..."></textarea>
+            </div>
+
+        </div>
+
+    </section>
+
+    <section class="card" style="margin-top: 20px;">
+        <h2>Conseils d’utilisation</h2>
+
+        <p class="note">
+            Cette page récupère les paramètres choisis et les envoie au serveur Node.js.
+            Le serveur doit ensuite récupérer les données de marché, les données on-chain,
+            les données de dominance, les données de dérivés ou le carnet des ordres.
+        </p>
+
+        <p class="note">
+            Pour Bitcoin, l’analyse avancée peut comparer le prix de BTC avec la dominance Bitcoin,
+            la capitalisation totale du marché crypto, la dominance USDT, la dominance USDC,
+            le dollar américain, l’or et d’autres actifs connexes.
+        </p>
+
+        <p class="note">
+            Le carnet des ordres ne peut pas être lu directement depuis le graphique TradingView intégré.
+            Il doit être récupéré côté serveur avec une API externe, par exemple Binance, Coinbase ou Kraken.
+        </p>
+    </section>
+
+</main>
+
+<footer>
+    Développé par Hocine Korichi, ingénieur — Page d’analyse TradingView
+</footer>
+
+<script src="https://s3.tradingview.com/tv.js"></script>
+
+<script>
+    const API_URL = "https://trading-pattern-api.onrender.com/api/analyse";
+
+    let widgetTradingView = null;
+    let actifsConnexesDisponibles = [];
+    let scriptPineGenere = "";
+
+    function lireParametres() {
+        const actif = document.getElementById("actif");
+        const intervalle = document.getElementById("intervalle");
+        const indicateur = document.getElementById("indicateur");
+        const strategie = document.getElementById("strategie");
+        const categorieAnalyse = document.getElementById("categorieAnalyse");
+        const modeAnalyseAvancee = document.getElementById("modeAnalyseAvancee");
+        const capital = document.getElementById("capital");
+        const risque = document.getElementById("risque");
+        const stopLoss = document.getElementById("stopLoss");
+        const takeProfit = document.getElementById("takeProfit");
+        const levier = document.getElementById("levier");
+        const sens = document.getElementById("sens");
+        const notes = document.getElementById("notes");
+
+        return {
+            actif: actif.value,
+            libelleActif: actif.options[actif.selectedIndex].text,
+            intervalle: intervalle.value,
+            libelleIntervalle: intervalle.options[intervalle.selectedIndex].text,
+            indicateur: indicateur.value,
+            libelleIndicateur: indicateur.options[indicateur.selectedIndex].text,
+            strategie: strategie.value,
+            libelleStrategie: strategie.options[strategie.selectedIndex].text,
+            categorieAnalyse: categorieAnalyse.value,
+            libelleCategorieAnalyse: categorieAnalyse.options[categorieAnalyse.selectedIndex].text,
+            descriptionCategorieAnalyse: obtenirDescriptionCategorie(categorieAnalyse.value),
+            modeAnalyseAvancee: modeAnalyseAvancee.value,
+            libelleModeAnalyseAvancee: modeAnalyseAvancee.options[modeAnalyseAvancee.selectedIndex].text,
+            actifsConnexes: lireActifsConnexesSelectionnes(),
+            capital: Number(capital.value),
+            risque: Number(risque.value),
+            stopLoss: Number(stopLoss.value),
+            takeProfit: Number(takeProfit.value),
+            levier: Number(levier.value),
+            sens: sens.value,
+            libelleSens: sens.options[sens.selectedIndex].text,
+            notes: notes.value.trim(),
+            source: "analyse-strategy.html",
+            dateEnvoi: new Date().toISOString()
+        };
+    }
+
+    function obtenirDescriptionCategorie(categorie) {
+        switch (categorie) {
+            case "macroeconomie":
+                return "Taux, inflation, liquidité mondiale, dollar, obligations, bilan de la Fed.";
+            case "monnaie_bitcoin":
+                return "Offre maximale, émission, halving, inflation de BTC.";
+            case "donnees_on_chain":
+                return "Adresses, transactions, MVRV, realized price, flux des plateformes.";
+            case "minage":
+                return "Taux de hachage, difficulté, revenus et ventes des mineurs.";
+            case "analyse_technique":
+                return "Graphiques, tendances, supports, résistances, RSI, moyennes mobiles.";
+            case "derives":
+                return "Contrats à terme, options, funding rates, open interest, liquidations.";
+            case "liquidite_marche":
+                return "Volumes, carnets d’ordres, spreads, profondeur de marché.";
+            case "institutionnel":
+                return "FNB Bitcoin, achats d’entreprises, fonds, banques, adoption officielle.";
+            case "sentiment":
+                return "Réseaux sociaux, Google Trends, médias, peur et avidité.";
+            case "reglementation_risques":
+                return "Lois, fiscalité, SEC, plateformes, garde, géopolitique.";
+            default:
+                return "Catégorie non reconnue.";
+        }
+    }
+
+    function mettreAJourDescriptionCategorie() {
+        const categorieAnalyse = document.getElementById("categorieAnalyse");
+        const description = obtenirDescriptionCategorie(categorieAnalyse.value);
+
+        document.getElementById("descriptionCategorie").innerHTML =
+            "<strong>Catégorie choisie :</strong> " +
+            categorieAnalyse.options[categorieAnalyse.selectedIndex].text +
+            ". " +
+            description;
+    }
+
+    function obtenirActifsConnexes(actifPrincipal) {
+        if (actifPrincipal === "BINANCE:BTCUSDT" || actifPrincipal === "COINBASE:BTCUSD") {
+            return [
+                { symbole: "CRYPTOCAP:BTC.D", nom: "Bitcoin dominance" },
+                { symbole: "CRYPTOCAP:TOTAL", nom: "Crypto total market cap" },
+                { symbole: "CRYPTOCAP:TOTAL2", nom: "Crypto market cap sans Bitcoin" },
+                { symbole: "CRYPTOCAP:TOTAL3", nom: "Crypto market cap sans Bitcoin ni Ethereum" },
+                { symbole: "CRYPTOCAP:USDT.D", nom: "USDT dominance" },
+                { symbole: "CRYPTOCAP:USDC.D", nom: "USDC dominance" },
+                { symbole: "CRYPTOCAP:OTHERS.D", nom: "Dominance des altcoins" },
+                { symbole: "BINANCE:ETHUSDT", nom: "Ethereum / USDT" },
+                { symbole: "OANDA:XAUUSD", nom: "Or / Dollar" },
+                { symbole: "TVC:DXY", nom: "Indice dollar américain" },
+                { symbole: "TVC:US10Y", nom: "Rendement obligataire américain 10 ans" },
+                { symbole: "NASDAQ:QQQ", nom: "Nasdaq 100 ETF" }
+            ];
+        }
+
+        if (actifPrincipal === "BINANCE:ETHUSDT") {
+            return [
+                { symbole: "BINANCE:BTCUSDT", nom: "Bitcoin / USDT" },
+                { symbole: "CRYPTOCAP:BTC.D", nom: "Bitcoin dominance" },
+                { symbole: "CRYPTOCAP:TOTAL", nom: "Crypto total market cap" },
+                { symbole: "CRYPTOCAP:TOTAL2", nom: "Crypto market cap sans Bitcoin" },
+                { symbole: "CRYPTOCAP:ETH.D", nom: "Ethereum dominance" },
+                { symbole: "CRYPTOCAP:USDT.D", nom: "USDT dominance" },
+                { symbole: "NASDAQ:QQQ", nom: "Nasdaq 100 ETF" }
+            ];
+        }
+
+        if (actifPrincipal === "OANDA:XAUUSD") {
+            return [
+                { symbole: "TVC:DXY", nom: "Indice dollar américain" },
+                { symbole: "TVC:US10Y", nom: "Rendement obligataire américain 10 ans" },
+                { symbole: "BINANCE:BTCUSDT", nom: "Bitcoin / USDT" },
+                { symbole: "NASDAQ:QQQ", nom: "Nasdaq 100 ETF" }
+            ];
+        }
+
+        return [
+            { symbole: "TVC:DXY", nom: "Indice dollar américain" },
+            { symbole: "NASDAQ:QQQ", nom: "Nasdaq 100 ETF" },
+            { symbole: "CRYPTOCAP:TOTAL", nom: "Crypto total market cap" },
+            { symbole: "BINANCE:BTCUSDT", nom: "Bitcoin / USDT" }
+        ];
+    }
+
+    function mettreAJourActifsConnexes() {
+        const actif = document.getElementById("actif").value;
+        const modeAnalyseAvancee = document.getElementById("modeAnalyseAvancee").value;
+        const selectActifsConnexes = document.getElementById("actifsConnexes");
+        const descriptionAnalyseAvancee = document.getElementById("descriptionAnalyseAvancee");
+
+        if (!selectActifsConnexes) {
+            return;
+        }
+
+        actifsConnexesDisponibles = obtenirActifsConnexes(actif);
+        selectActifsConnexes.innerHTML = "";
+
+        const optionTous = document.createElement("option");
+        optionTous.value = "__TOUS__";
+        optionTous.textContent = "Tous les actifs connexes recommandés";
+        optionTous.selected = true;
+        selectActifsConnexes.appendChild(optionTous);
+
+        actifsConnexesDisponibles.forEach(function (item) {
+            const option = document.createElement("option");
+            option.value = item.symbole;
+            option.textContent = item.nom + " — " + item.symbole;
+            selectActifsConnexes.appendChild(option);
+        });
+
+        let texteMode = "";
+
+        switch (modeAnalyseAvancee) {
+            case "simple":
+                texteMode = "Analyse simple : seul l’actif principal est prioritaire. Tu peux choisir un actif connexe si nécessaire.";
+                break;
+            case "snapshots":
+                texteMode = "Snapshots : Node.js recevra l’actif principal et l’actif connexe choisi, ou tous les actifs recommandés.";
+                break;
+            case "multi_charts":
+                texteMode = "Multi-charts : Node.js comparera l’actif principal avec l’actif connexe choisi, ou avec tous les actifs recommandés.";
+                break;
+            case "carnet_ordres":
+                texteMode = "Carnet des ordres : Node.js devra appeler une API externe pour récupérer les ordres d’achat, de vente, les volumes et la profondeur de marché.";
+                break;
+            case "complet":
+                texteMode = "Analyse complète : snapshots, multi-charts, actif connexe et carnet des ordres seront demandés au serveur.";
+                break;
+            default:
+                texteMode = "Mode d’analyse non reconnu.";
+        }
+
+        descriptionAnalyseAvancee.innerHTML =
+            "<strong>Analyse avancée :</strong> " + texteMode;
+    }
+
+    function lireActifsConnexesSelectionnes() {
+        const selectActifsConnexes = document.getElementById("actifsConnexes");
+
+        if (!selectActifsConnexes || selectActifsConnexes.selectedIndex < 0) {
+            return [];
+        }
+
+        if (selectActifsConnexes.value === "__TOUS__") {
+            return actifsConnexesDisponibles.map(function (item) {
+                return {
+                    symbole: item.symbole,
+                    libelle: item.nom + " — " + item.symbole
+                };
+            });
+        }
+
+        return [
+            {
+                symbole: selectActifsConnexes.value,
+                libelle: selectActifsConnexes.options[selectActifsConnexes.selectedIndex].text
+            }
+        ];
+    }
+
+    function genererScriptPine() {
+        const params = lireParametres();
+
+        const nomStrategie = "Strategie " + params.libelleIndicateur + " - " + params.actif + " - " + params.intervalle;
+
+        let conditionAchat = "ta.crossover(close, emaLongue)";
+        let conditionVente = "ta.crossunder(close, emaLongue)";
+
+        if (params.indicateur === "RSI") {
+            conditionAchat = "rsi < 30";
+            conditionVente = "rsi > 70";
+        }
+
+        if (params.indicateur === "MACD") {
+            conditionAchat = "ta.crossover(macdLine, signalLine)";
+            conditionVente = "ta.crossunder(macdLine, signalLine)";
+        }
+
+        if (params.indicateur === "EMA" || params.indicateur === "SMA") {
+            conditionAchat = "ta.crossover(emaCourte, emaLongue)";
+            conditionVente = "ta.crossunder(emaCourte, emaLongue)";
+        }
+
+        const stopLossValeur = params.stopLoss / 100;
+        const takeProfitValeur = params.takeProfit / 100;
+
+        return `//@version=5
+// Script généré automatiquement depuis la page HTML d'analyse.
+// Actif sélectionné : ${params.actif}
+// Libellé actif : ${params.libelleActif}
+// Intervalle : ${params.libelleIntervalle}
+// Indicateur : ${params.libelleIndicateur}
+// Stratégie : ${params.libelleStrategie}
+// Catégorie d'analyse : ${params.libelleCategorieAnalyse}
+// Mode avancé : ${params.libelleModeAnalyseAvancee}
+// Capital initial : ${params.capital}
+// Risque par position : ${params.risque}%
+// Stop loss : ${params.stopLoss}%
+// Take profit : ${params.takeProfit}%
+// Levier : ${params.levier}
+// Sens de trading : ${params.libelleSens}
+// Notes : ${params.notes || "Aucune note"}
+
+strategy("${nomStrategie}", overlay=true, initial_capital=${params.capital}, default_qty_type=strategy.percent_of_equity, default_qty_value=${params.risque})
+
+sourcePrix = close
+
+emaCourte = ta.ema(sourcePrix, 20)
+emaLongue = ta.ema(sourcePrix, 50)
+smaLongue = ta.sma(sourcePrix, 50)
+rsi = ta.rsi(sourcePrix, 14)
+[macdLine, signalLine, histLine] = ta.macd(sourcePrix, 12, 26, 9)
+
+conditionAchat = ${conditionAchat}
+conditionVente = ${conditionVente}
+
+prixStopAchat = strategy.position_avg_price * (1 - ${stopLossValeur})
+prixProfitAchat = strategy.position_avg_price * (1 + ${takeProfitValeur})
+
+prixStopVente = strategy.position_avg_price * (1 + ${stopLossValeur})
+prixProfitVente = strategy.position_avg_price * (1 - ${takeProfitValeur})
+
+autoriserAchat = "${params.sens}" == "achat" or "${params.sens}" == "achat_vente"
+autoriserVente = "${params.sens}" == "vente" or "${params.sens}" == "achat_vente"
+
+if conditionAchat and autoriserAchat
+    strategy.entry("Achat", strategy.long)
+
+if conditionVente and autoriserVente
+    strategy.entry("Vente", strategy.short)
+
+strategy.exit("Sortie achat", from_entry="Achat", stop=prixStopAchat, limit=prixProfitAchat)
+strategy.exit("Sortie vente", from_entry="Vente", stop=prixStopVente, limit=prixProfitVente)
+
+plot(emaCourte, title="EMA 20")
+plot(emaLongue, title="EMA 50")
+plot(smaLongue, title="SMA 50")
+
+// Rappel : TradingView ne permet pas d'injecter automatiquement ce script dans Pine Editor depuis une page HTML externe.
+// Méthode recommandée : générer le script, le copier, ouvrir TradingView, puis le coller dans Pine Editor.`;
+    }
+
+    function afficherScriptPine() {
+        scriptPineGenere = genererScriptPine();
+
+        document.getElementById("resultatAnalyse").textContent =
+            "SCRIPT PINE GÉNÉRÉ\n" +
+            "------------------\n\n" +
+            scriptPineGenere;
+
+        document.getElementById("etatServeur").className = "status ok";
+        document.getElementById("etatServeur").textContent = "Script Pine généré";
+
+        alert("Le script Pine a été généré avec succès.");
+    }
+
+    function afficherPineScript() {
+        if (!scriptPineGenere) {
+            scriptPineGenere = genererScriptPine();
+        }
+
+        document.getElementById("resultatAnalyse").textContent =
+            "AFFICHAGE DU SCRIPT PINE\n" +
+            "------------------------\n\n" +
+            scriptPineGenere;
+
+        document.getElementById("etatServeur").className = "status ok";
+        document.getElementById("etatServeur").textContent = "Script Pine affiché";
+
+        alert("Le script Pine est maintenant affiché dans la zone des résultats.");
+    }
+
+    async function copierScriptPine() {
+        const resultatBox = document.getElementById("resultatAnalyse");
+
+        if (!scriptPineGenere) {
+            scriptPineGenere = genererScriptPine();
+        }
+
+        try {
+            await navigator.clipboard.writeText(scriptPineGenere);
+
+            resultatBox.textContent =
+                "SCRIPT PINE COPIÉ DANS LE PRESSE-PAPIERS\n" +
+                "----------------------------------------\n\n" +
+                scriptPineGenere;
+
+            document.getElementById("etatServeur").className = "status ok";
+            document.getElementById("etatServeur").textContent = "Script Pine copié";
+
+            alert("Le script Pine a été copié dans le presse-papiers.");
+
+        } catch (erreur) {
+            const zoneCopie = document.createElement("textarea");
+            zoneCopie.value = scriptPineGenere;
+            document.body.appendChild(zoneCopie);
+            zoneCopie.select();
+
+            try {
+                document.execCommand("copy");
+
+                resultatBox.textContent =
+                    "SCRIPT PINE COPIÉ DANS LE PRESSE-PAPIERS\n" +
+                    "----------------------------------------\n\n" +
+                    scriptPineGenere;
+
+                document.getElementById("etatServeur").className = "status ok";
+                document.getElementById("etatServeur").textContent = "Script Pine copié";
+
+                alert("Le script Pine a été copié dans le presse-papiers.");
+
+            } catch (erreurCopie) {
+                resultatBox.textContent =
+                    "Impossible de copier automatiquement le script Pine.\n\n" +
+                    "Tu peux le sélectionner manuellement ci-dessous :\n\n" +
+                    scriptPineGenere;
+
+                document.getElementById("etatServeur").className = "status error";
+                document.getElementById("etatServeur").textContent = "Copie impossible";
+
+                alert("Impossible de copier automatiquement le script Pine.");
+            }
+
+            document.body.removeChild(zoneCopie);
+        }
+    }
+
+    function chargerGraphique() {
+        const params = lireParametres();
+
+        document.getElementById("tradingview-widget").innerHTML = "";
+
+        widgetTradingView = new TradingView.widget({
+            container_id: "tradingview-widget",
+            autosize: true,
+            symbol: params.actif,
+            interval: params.intervalle,
+            timezone: "America/Toronto",
+            theme: "dark",
+            style: "1",
+            locale: "fr",
+            toolbar_bg: "#111827",
+            enable_publishing: false,
+            allow_symbol_change: true,
+            hide_side_toolbar: false,
+            studies: choisirEtudeTradingView(params.indicateur)
+        });
+    }
+
+    function choisirEtudeTradingView(indicateur) {
+        switch (indicateur) {
+            case "RSI":
+                return ["RSI@tv-basicstudies"];
+            case "MACD":
+                return ["MACD@tv-basicstudies"];
+            case "EMA":
+                return ["MASimple@tv-basicstudies"];
+            case "SMA":
+                return ["MASimple@tv-basicstudies"];
+            case "VOLUME":
+                return ["Volume@tv-basicstudies"];
+            default:
+                return [];
+        }
+    }
+
+    function rafraichirGraphique() {
+        chargerGraphique();
+    }
+
+    function ouvrirTradingView() {
+        const params = lireParametres();
+
+        const parametresUrl = new URLSearchParams();
+
+        parametresUrl.set("symbol", params.actif);
+        parametresUrl.set("interval", params.intervalle);
+        parametresUrl.set("indicateur", params.indicateur);
+        parametresUrl.set("strategie", params.strategie);
+        parametresUrl.set("categorieAnalyse", params.categorieAnalyse);
+        parametresUrl.set("modeAnalyseAvancee", params.modeAnalyseAvancee);
+        parametresUrl.set("capital", params.capital);
+        parametresUrl.set("risque", params.risque);
+        parametresUrl.set("stopLoss", params.stopLoss);
+        parametresUrl.set("takeProfit", params.takeProfit);
+        parametresUrl.set("levier", params.levier);
+        parametresUrl.set("sens", params.sens);
+        parametresUrl.set("actifsConnexes", JSON.stringify(params.actifsConnexes));
+
+        if (params.notes) {
+            parametresUrl.set("notes", params.notes);
+        }
+
+        const url = "https://www.tradingview.com/chart/?" + parametresUrl.toString();
+
+        window.open(url, "_blank");
+    }
+
+    async function testerServeur() {
+        const etat = document.getElementById("etatServeur");
+
+        etat.className = "status warning";
+        etat.textContent = "Test du serveur en cours...";
+
+        try {
+            const reponse = await fetch(API_URL, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    test: true,
+                    message: "Test depuis analyse-strategy.html",
+                    categorieAnalyse: document.getElementById("categorieAnalyse").value,
+                    modeAnalyseAvancee: document.getElementById("modeAnalyseAvancee").value,
+                    actifsConnexes: lireActifsConnexesSelectionnes()
+                })
+            });
+
+            if (!reponse.ok) {
+                throw new Error("Réponse serveur invalide : " + reponse.status);
+            }
+
+            const resultat = await reponse.json();
+
+            etat.className = "status ok";
+            etat.textContent = "Serveur connecté";
+
+            document.getElementById("resultatAnalyse").textContent =
+                "Test réussi.\n\nRéponse du serveur :\n" +
+                JSON.stringify(resultat, null, 2);
+
+        } catch (erreur) {
+            etat.className = "status error";
+            etat.textContent = "Serveur inaccessible";
+
+            document.getElementById("resultatAnalyse").textContent =
+                "Erreur de connexion au serveur Node.js.\n\n" +
+                "Vérifie :\n" +
+                "- que le serveur est bien déployé ;\n" +
+                "- que l’adresse API_URL est correcte ;\n" +
+                "- que CORS est activé dans server.js ;\n" +
+                "- que l’URL commence par https://.\n\n" +
+                "Détail technique :\n" + erreur.message;
+        }
+    }
+
+    async function analyserStrategie() {
+        const params = lireParametres();
+        const resultatBox = document.getElementById("resultatAnalyse");
+        const etat = document.getElementById("etatServeur");
+
+        resultatBox.textContent = "Analyse en cours...";
+        etat.className = "status warning";
+        etat.textContent = "Analyse en cours";
+
+        try {
+            const reponse = await fetch(API_URL, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(params)
+            });
+
+            if (!reponse.ok) {
+                throw new Error("Erreur serveur : " + reponse.status);
+            }
+
+            const resultat = await reponse.json();
+
+            etat.className = "status ok";
+            etat.textContent = "Analyse terminée";
+
+            resultatBox.textContent =
+                "PARAMÈTRES ENVOYÉS\n" +
+                "-----------------\n" +
+                "Actif : " + params.libelleActif + "\n" +
+                "Symbole : " + params.actif + "\n" +
+                "Intervalle : " + params.libelleIntervalle + "\n" +
+                "Indicateur : " + params.libelleIndicateur + "\n" +
+                "Stratégie : " + params.libelleStrategie + "\n" +
+                "Catégorie d’analyse : " + params.libelleCategorieAnalyse + "\n" +
+                "Code catégorie : " + params.categorieAnalyse + "\n" +
+                "Description catégorie : " + params.descriptionCategorieAnalyse + "\n" +
+                "Mode avancé : " + params.libelleModeAnalyseAvancee + "\n" +
+                "Code mode avancé : " + params.modeAnalyseAvancee + "\n\n" +
+
+                "ACTIFS CONNEXES TRANSMIS\n" +
+                "------------------------\n" +
+                (
+                    params.actifsConnexes.length > 0
+                        ? params.actifsConnexes.map(function (a) {
+                            return "- " + a.libelle;
+                        }).join("\n")
+                        : "Aucun actif connexe sélectionné."
+                ) +
+                "\n\n" +
+
+                "GESTION DU RISQUE\n" +
+                "-----------------\n" +
+                "Capital : " + params.capital + "\n" +
+                "Risque : " + params.risque + "%\n" +
+                "Stop loss : " + params.stopLoss + "%\n" +
+                "Take profit : " + params.takeProfit + "%\n" +
+                "Levier : " + params.levier + "\n" +
+                "Sens : " + params.libelleSens + "\n" +
+                "Notes : " + (params.notes || "Aucune note") + "\n\n" +
+
+                "RÉPONSE DU SERVEUR NODE.JS\n" +
+                "--------------------------\n" +
+                JSON.stringify(resultat, null, 2);
+
+        } catch (erreur) {
+            etat.className = "status error";
+            etat.textContent = "Erreur d’analyse";
+
+            resultatBox.textContent =
+                "Impossible d’obtenir l’analyse.\n\n" +
+                "Causes possibles :\n" +
+                "- le serveur Node.js n’est pas lancé ;\n" +
+                "- l’adresse API_URL est fausse ;\n" +
+                "- Render n’a pas encore démarré le service ;\n" +
+                "- CORS n’est pas activé ;\n" +
+                "- la route /api/analyse n’existe pas.\n\n" +
+                "Détail technique :\n" + erreur.message;
+        }
+    }
+
+    function viderResultats() {
+        document.getElementById("resultatAnalyse").textContent = "Aucune analyse lancée.";
+        document.getElementById("etatServeur").className = "status neutral";
+        document.getElementById("etatServeur").textContent = "Serveur non testé";
+        scriptPineGenere = "";
+    }
+
+    window.addEventListener("load", function () {
+        mettreAJourDescriptionCategorie();
+        mettreAJourActifsConnexes();
+        chargerGraphique();
+    });
+</script>
+
+</body>
+</html>

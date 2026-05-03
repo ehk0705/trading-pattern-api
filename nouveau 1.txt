@@ -1,0 +1,14 @@
+catégories d'infos
+1. Donnes des fondamentaux économiques
+2. Donnes sur la blockchain
+3. Analyse technique Multi chart et Multi Time framework
+4. Analyse des donnes financières (Quant)
+
+snapshots
+multi-charts
+carnet des ordres
+
+Quand tu analyses un actif, tu dois regarder les actifs sous-jacent, les autres charts.
+
+Exemple Bitcoin, tu dois regarder Stablecoin dominance, bitcoin dominance, crypto total market cap, usdt dominance, usdc dominance, gold/btc.
+
