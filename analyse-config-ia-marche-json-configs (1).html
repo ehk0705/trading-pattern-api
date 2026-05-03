@@ -526,7 +526,7 @@
       <!--  <button class="btn-import" onclick="ouvrirImportJSON()" title="Importe une configuration JSON déjà sauvegardée.">Importer JSON</button>-->
       <!--<button class="btn-api" onclick="envoyerVersAPI()" title="Envoie la configuration brute au serveur Node.js sur Render.">Envoyer IA</button>-->
       <!--<button class="btn-ai" onclick="analyserSnapshotIA()" title="Analyse la configuration ou le snapshot chargé selon la catégorie choisie.">Analyse IA</button>-->
-        <button class="btn-decision" onclick="ouvrirPageDecision()" title="Ouvre une page dédiée aux décisions IA : acheter, vendre ou attendre.">A</button>
+        <button class="btn-decision" onclick="ouvrirPageDecision()" title="Ouvre une page dédiée aux décisions IA : acheter, vendre ou attendre.">Analyser</button>
         <button class="btn-clear" onclick="effacerConfiguration()" title="Efface la configuration affichée et les résultats de l’analyse IA.">Effacer</button>
     </div>
 </header>
@@ -665,6 +665,10 @@ Aucun test effectué.
 
     function getApiMarcheUrl() {
         return getApiBaseUrl() + "/api/marche";
+    }
+
+    function getApiJsonConfigsUrl() {
+        return getApiBaseUrl() + "/api/json-configs";
     }
 
     function afficherEtatServeur(type, message) {
@@ -1110,15 +1114,109 @@ Aucun test effectué.
         }
     }
 
-    function sauvegarderConfiguration() {
+    function telechargerJSONDansNavigateur(configuration, nomFichier) {
+        const contenu = JSON.stringify(configuration, null, 4);
+        const fichier = new Blob([contenu], { type: "application/json" });
+        const lien = document.createElement("a");
+
+        lien.href = URL.createObjectURL(fichier);
+        lien.download = nomFichier;
+        document.body.appendChild(lien);
+        lien.click();
+        document.body.removeChild(lien);
+
+        URL.revokeObjectURL(lien.href);
+    }
+
+    async function sauvegarderJSONSurRender(configuration, nomFichier) {
+        const url = getApiJsonConfigsUrl();
+
+        const reponse = await fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            cache: "no-store",
+            body: JSON.stringify({
+                nomFichier: nomFichier,
+                contenu: configuration
+            })
+        });
+
+        const texte = await reponse.text();
+        let resultat;
+
+        try {
+            resultat = JSON.parse(texte);
+        } catch (erreurJson) {
+            throw new Error("Le serveur n’a pas retourné du JSON : " + texte);
+        }
+
+        if (!reponse.ok) {
+            throw new Error("Réponse HTTP " + reponse.status + " : " + JSON.stringify(resultat));
+        }
+
+        return resultat;
+    }
+
+    async function sauvegarderConfiguration() {
         if (!configurationActuelle) {
             capturerConfigurationTradingView();
         }
 
+        const nomFichier = genererNomFichierJSON(configurationActuelle);
+
         localStorage.setItem("configurationTradingViewIA", JSON.stringify(configurationActuelle));
 
-        afficherStatus("Configuration sauvegardée dans le navigateur.");
-        alert("Configuration sauvegardée.");
+        telechargerJSONDansNavigateur(configurationActuelle, nomFichier);
+
+        afficherStatus("Configuration sauvegardée localement. Envoi vers json-configs en cours...");
+        afficherEtatServeur("warning", "Sauvegarde JSON en cours...");
+
+        try {
+            const resultat = await sauvegarderJSONSurRender(configurationActuelle, nomFichier);
+
+            afficherStatus("Configuration sauvegardée dans le navigateur et dans json-configs.");
+            afficherEtatServeur("ok", "JSON sauvegardé");
+            afficherInfosServeur(
+                "JSON SAUVEGARDÉ
+" +
+                "--------------
+" +
+                "Dossier serveur : json-configs
+" +
+                "Fichier : " + (resultat.fichier || nomFichier) + "
+" +
+                "URL : " + (resultat.url || getApiJsonConfigsUrl())
+            );
+
+            alert("Configuration sauvegardée dans le navigateur et dans json-configs.");
+        } catch (erreur) {
+            afficherStatus("Configuration sauvegardée dans le navigateur. Échec de l’envoi vers json-configs.");
+            afficherEtatServeur("warning", "JSON local seulement");
+            afficherInfosServeur(
+                "SAUVEGARDE JSON PARTIELLE
+" +
+                "-------------------------
+" +
+                "La configuration a été sauvegardée dans le navigateur.
+" +
+                "Un fichier JSON a aussi été téléchargé.
+
+" +
+                "Mais l’écriture dans le dossier serveur json-configs a échoué.
+
+" +
+                "Route appelée : " + getApiJsonConfigsUrl() + "
+
+" +
+                "Détail technique :
+" +
+                erreur.message
+            );
+
+            alert("Configuration sauvegardée localement, mais pas dans json-configs. Vérifie server.js.");
+        }
     }
 
     function rechargerConfigurationTradingView() {

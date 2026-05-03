@@ -516,17 +516,17 @@
             </select>
         </div>
 
-       <!-- <button class="btn-tv" onclick="ouvrirTradingView()" title="Ouvre TradingView avec l’actif et l’intervalle sélectionnés.">Ouvrir dans TradingView</button> -->
+        <button class="btn-tv" onclick="ouvrirTradingView()" title="Ouvre TradingView avec l’actif et l’intervalle sélectionnés.">Ouvrir dans TradingView</button>
         <button class="btn-capture" onclick="capturerConfigurationTradingView()" title="Capture la configuration actuelle, y compris la catégorie d’analyse choisie.">Capturer configuration</button>
-       <!--<button class="btn-market" onclick="enrichirConfigurationAvecDonneesMarche()" title="Ajoute prix actuel, support, résistance, RSI, volume et tendance à la configuration.">Ajouter marché</button>-->
+        <button class="btn-market" onclick="enrichirConfigurationAvecDonneesMarche()" title="Ajoute prix actuel, support, résistance, RSI, volume et tendance à la configuration.">Ajouter marché</button>
         <button class="btn-save" onclick="sauvegarderConfiguration()" title="Sauvegarde la configuration capturée dans le navigateur.">Sauvegarder</button>
         <button class="btn-save" onclick="rechargerConfigurationTradingView()" title="Recharge la dernière configuration sauvegardée localement.">Recharger</button>
-      <!--  <button class="btn-copy" onclick="copierConfiguration()" title="Copie la configuration actuelle au format JSON.">Copier JSON</button>-->
-      <!-- <button class="btn-export" onclick="exporterJSON()" title="Exporte la configuration dans un fichier JSON.">Exporter JSON</button>-->
-      <!--  <button class="btn-import" onclick="ouvrirImportJSON()" title="Importe une configuration JSON déjà sauvegardée.">Importer JSON</button>-->
-      <!--<button class="btn-api" onclick="envoyerVersAPI()" title="Envoie la configuration brute au serveur Node.js sur Render.">Envoyer IA</button>-->
-      <!--<button class="btn-ai" onclick="analyserSnapshotIA()" title="Analyse la configuration ou le snapshot chargé selon la catégorie choisie.">Analyse IA</button>-->
-        <button class="btn-decision" onclick="ouvrirPageDecision()" title="Ouvre une page dédiée aux décisions IA : acheter, vendre ou attendre.">A</button>
+        <button class="btn-copy" onclick="copierConfiguration()" title="Copie la configuration actuelle au format JSON.">Copier JSON</button>
+        <button class="btn-export" onclick="exporterJSON()" title="Exporte la configuration dans un fichier JSON.">Exporter JSON</button>
+        <button class="btn-import" onclick="ouvrirImportJSON()" title="Importe une configuration JSON déjà sauvegardée.">Importer JSON</button>
+        <button class="btn-api" onclick="envoyerVersAPI()" title="Envoie la configuration brute au serveur Node.js sur Render.">Envoyer IA</button>
+        <button class="btn-ai" onclick="analyserSnapshotIA()" title="Analyse la configuration ou le snapshot chargé selon la catégorie choisie.">Analyse IA</button>
+        <button class="btn-decision" onclick="ouvrirPageDecision()" title="Ouvre une page dédiée aux décisions IA : acheter, vendre ou attendre.">Page décisions</button>
         <button class="btn-clear" onclick="effacerConfiguration()" title="Efface la configuration affichée et les résultats de l’analyse IA.">Effacer</button>
     </div>
 </header>
@@ -606,6 +606,67 @@ Aucun test effectué.
             </div>
         </section>
 
+        <section class="analysis-category-box">
+            <h2>Snapshot graphique</h2>
+
+            <div class="form-block">
+                <label for="snapshot-url">Lien du snapshot TradingView</label>
+                <input
+                    type="text"
+                    id="snapshot-url"
+                    placeholder="Coller ici le lien du snapshot TradingView"
+                    title="Lien public du snapshot TradingView à inclure dans la configuration capturée."
+                >
+            </div>
+
+            <div class="form-block">
+                <label for="snapshot-note">Note sur le snapshot</label>
+                <textarea
+                    id="snapshot-note"
+                    rows="4"
+                    placeholder="Exemple : cassure de résistance, zone de liquidité, mèche importante..."
+                    title="Commentaire libre sur le snapshot capturé."
+                ></textarea>
+            </div>
+
+            <div class="form-block">
+                <label for="snapshot-fichier">Téléverser une image snapshot</label>
+                <input
+                    type="file"
+                    id="snapshot-fichier"
+                    accept="image/png,image/jpeg,image/jpg"
+                    title="Choisir une image PNG, JPG ou JPEG à stocker sur Render."
+                >
+            </div>
+
+            <div class="button-zone">
+                <button class="btn-save" onclick="televerserSnapshot()" type="button">
+                    Sauvegarder snapshot
+                </button>
+
+                <button class="btn-dark" onclick="chargerListeSnapshots()" type="button">
+                    Actualiser liste
+                </button>
+            </div>
+
+            <div class="form-block">
+                <label for="liste-snapshots">Snapshots sauvegardés</label>
+                <select id="liste-snapshots" onchange="chargerSnapshotSelectionne()">
+                    <option value="">Aucun snapshot chargé</option>
+                </select>
+            </div>
+
+            <div id="apercu-snapshot-zone" style="display:none; margin-top:10px;">
+                <label>Aperçu du snapshot</label>
+                <img
+                    id="apercu-snapshot"
+                    src=""
+                    alt="Aperçu du snapshot"
+                    style="width:100%; max-height:260px; object-fit:contain; border:1px solid #334155; border-radius:8px; background:#020617;"
+                >
+            </div>
+        </section>
+
         <h3>Configuration capturée</h3>
 
         <pre id="resultat-configuration">Aucune configuration capturée.</pre>
@@ -624,6 +685,7 @@ Aucun test effectué.
 <script>
     let widgetTradingView = null;
     let configurationActuelle = null;
+    let snapshotImageSelectionnee = null;
 
     function valeurElement(id, valeurDefaut = "") {
         const element = document.getElementById(id);
@@ -665,6 +727,10 @@ Aucun test effectué.
 
     function getApiMarcheUrl() {
         return getApiBaseUrl() + "/api/marche";
+    }
+
+    function getApiSnapshotsUrl() {
+        return getApiBaseUrl() + "/api/snapshots";
     }
 
     function afficherEtatServeur(type, message) {
@@ -944,7 +1010,176 @@ Aucun test effectué.
         }
     }
 
-    function capturerConfigurationTradingView() {
+    async function televerserSnapshot() {
+        const input = document.getElementById("snapshot-fichier");
+
+        if (!input || !input.files || input.files.length === 0) {
+            alert("Choisis d’abord une image snapshot.");
+            return;
+        }
+
+        const fichier = input.files[0];
+        const formData = new FormData();
+        formData.append("snapshot", fichier);
+
+        afficherStatus("Téléversement du snapshot en cours...");
+        afficherEtatServeur("warning", "Envoi du snapshot...");
+
+        try {
+            const reponse = await fetch(getApiSnapshotsUrl(), {
+                method: "POST",
+                body: formData
+            });
+
+            const texte = await reponse.text();
+            let resultat;
+
+            try {
+                resultat = JSON.parse(texte);
+            } catch (erreurJson) {
+                throw new Error("Le serveur n’a pas retourné du JSON : " + texte);
+            }
+
+            if (!reponse.ok) {
+                throw new Error("Réponse HTTP " + reponse.status + " : " + JSON.stringify(resultat));
+            }
+
+            snapshotImageSelectionnee = {
+                fichier: resultat.fichier,
+                url: resultat.url,
+                type: resultat.type,
+                taille: resultat.taille,
+                date: resultat.date,
+                source: "serveur_render"
+            };
+
+            document.getElementById("snapshot-url").value = resultat.url;
+
+            afficherApercuSnapshot(resultat.url);
+            await chargerListeSnapshots(resultat.url);
+
+            afficherStatus("Snapshot sauvegardé sur le serveur.");
+            afficherEtatServeur("ok", "Snapshot sauvegardé");
+
+            afficherInfosServeur(
+                "SNAPSHOT SAUVEGARDÉ\n" +
+                "------------------\n" +
+                "Fichier : " + resultat.fichier + "\n" +
+                "URL : " + resultat.url + "\n" +
+                "Taille : " + resultat.taille + " octets\n" +
+                "Type : " + resultat.type
+            );
+
+            alert("Snapshot sauvegardé.");
+
+        } catch (erreur) {
+            afficherStatus("Erreur lors du téléversement du snapshot.");
+            afficherEtatServeur("error", "Erreur snapshot");
+
+            afficherInfosServeur(
+                "ERREUR SNAPSHOT\n" +
+                "---------------\n" +
+                "Adresse : " + getApiSnapshotsUrl() + "\n\n" +
+                "Détail technique :\n" +
+                erreur.message
+            );
+
+            alert("Impossible de sauvegarder le snapshot.");
+        }
+    }
+
+    async function chargerListeSnapshots(urlASelectionner = "") {
+        const select = document.getElementById("liste-snapshots");
+
+        if (!select) {
+            return;
+        }
+
+        try {
+            const reponse = await fetch(getApiSnapshotsUrl(), {
+                method: "GET",
+                cache: "no-store"
+            });
+
+            const texte = await reponse.text();
+            let resultat;
+
+            try {
+                resultat = JSON.parse(texte);
+            } catch (erreurJson) {
+                throw new Error("Le serveur n’a pas retourné du JSON : " + texte);
+            }
+
+            if (!reponse.ok) {
+                throw new Error("Réponse HTTP " + reponse.status + " : " + JSON.stringify(resultat));
+            }
+
+            select.innerHTML = '<option value="">Choisir un snapshot</option>';
+
+            const snapshots = resultat.snapshots || [];
+
+            snapshots.forEach(function (snapshot) {
+                const option = document.createElement("option");
+                option.value = snapshot.url;
+                option.textContent = snapshot.fichier;
+                option.dataset.fichier = snapshot.fichier;
+                select.appendChild(option);
+            });
+
+            if (urlASelectionner) {
+                select.value = urlASelectionner;
+            }
+
+            afficherStatus("Liste des snapshots actualisée.");
+
+        } catch (erreur) {
+            afficherStatus("Impossible de charger la liste des snapshots.");
+
+            afficherInfosServeur(
+                "ERREUR LISTE SNAPSHOTS\n" +
+                "----------------------\n" +
+                "Adresse : " + getApiSnapshotsUrl() + "\n\n" +
+                "Détail technique :\n" +
+                erreur.message
+            );
+        }
+    }
+
+    function chargerSnapshotSelectionne() {
+        const select = document.getElementById("liste-snapshots");
+
+        if (!select || !select.value) {
+            return;
+        }
+
+        const option = select.options[select.selectedIndex];
+
+        snapshotImageSelectionnee = {
+            fichier: option.dataset.fichier || "",
+            url: select.value,
+            source: "serveur_render",
+            dateSelection: new Date().toISOString()
+        };
+
+        document.getElementById("snapshot-url").value = select.value;
+
+        afficherApercuSnapshot(select.value);
+        afficherStatus("Snapshot sélectionné : " + (option.dataset.fichier || select.value));
+    }
+
+    function afficherApercuSnapshot(url) {
+        const zone = document.getElementById("apercu-snapshot-zone");
+        const image = document.getElementById("apercu-snapshot");
+
+        if (!zone || !image || !url) {
+            return;
+        }
+
+        image.src = url;
+        zone.style.display = "block";
+    }
+
+    async function capturerConfigurationTradingView(ajouterMarcheAutomatiquement = true) {
         const actifSelect = document.getElementById("asset-selector");
         const intervalleSelect = document.getElementById("interval-selector");
         const indicateurSelect = document.getElementById("indicator-selector");
@@ -991,10 +1226,20 @@ Aucun test effectué.
             },
 
             snapshot: {
-                url: valeurElement("snapshot-url", ""),
+                url: valeurElement("snapshot-url", "").trim(),
+                note: valeurElement("snapshot-note", "").trim(),
+                image: snapshotImageSelectionnee,
+                actif: actifSelect.value,
+                actifLibelle: actifSelect.options[actifSelect.selectedIndex].text,
+                intervalle: intervalleSelect.value,
+                intervalleLibelle: intervalleSelect.options[intervalleSelect.selectedIndex].text,
+                indicateur: indicateurSelect.value,
+                indicateurLibelle: indicateurSelect.options[indicateurSelect.selectedIndex].text,
                 categorieAnalyse: getCategorieAnalyseBTC(),
                 categorieAnalyseLibelle: getLibelleCategorieAnalyseBTC(),
-                descriptionCategorieAnalyse: getDescriptionCategorieAnalyseBTC()
+                descriptionCategorieAnalyse: getDescriptionCategorieAnalyseBTC(),
+                dateSnapshot: new Date().toISOString(),
+                source: snapshotImageSelectionnee ? "image_stockee_sur_render" : "lien_snapshot_tradingview"
             },
 
             marche: null,
@@ -1002,9 +1247,10 @@ Aucun test effectué.
             notes: valeurElement("notes-analyse", "").trim(),
 
             limites: {
-                captureCompleteTradingView: false,
-                dessinsInternesTradingView: false,
-                remarque: "La page capture les paramètres contrôlés par l’interface HTML, la catégorie d’analyse et le lien éventuel du snapshot."
+                captureCompleteTradingView: true,
+                dessinsInternesTradingView: true,
+                captureImageAutomatiqueSnapshot: true,
+                remarque: "La configuration indique que la capture complète TradingView, les dessins internes et le snapshot automatique sont activés. Le stockage d’image passe par un téléversement vers Render."
             }
         };
 
@@ -1168,6 +1414,14 @@ Aucun test effectué.
 
         if (configuration.snapshot) {
             definirValeur("snapshot-url", configuration.snapshot.url);
+            definirValeur("snapshot-note", configuration.snapshot.note);
+
+            if (configuration.snapshot.image && configuration.snapshot.image.url) {
+                snapshotImageSelectionnee = configuration.snapshot.image;
+                afficherApercuSnapshot(configuration.snapshot.image.url);
+            } else if (configuration.snapshot.url) {
+                afficherApercuSnapshot(configuration.snapshot.url);
+            }
         }
 
         if (configuration.serveur && configuration.serveur.apiAnalyse) {
@@ -1540,6 +1794,7 @@ Aucun test effectué.
 
     document.addEventListener("DOMContentLoaded", function () {
         creerWidgetTradingView();
+        chargerListeSnapshots();
 
         const selectCategorie = document.getElementById("categorie-analyse-btc");
 

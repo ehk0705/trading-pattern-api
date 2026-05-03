@@ -241,9 +241,35 @@
 
         <p class="info">
             Charge un fichier JSON depuis ton dossier <strong>/snapshots</strong>, ou charge la dernière sauvegarde locale.
-            Les données concrètes du marché sont maintenant rafraîchies automatiquement depuis le serveur avant l’analyse.
+            Les données concrètes du marché sont rafraîchies automatiquement depuis le serveur avant l’analyse.
         </p>
     </div>
+
+    <section class="card">
+        <h2>Paramètres de configuration</h2>
+
+        <div class="grid">
+            <div class="field">
+                <label for="champ-actif">Actif</label>
+                <input type="text" id="champ-actif" placeholder="Exemple : BINANCE:BTCUSDT">
+            </div>
+
+            <div class="field">
+                <label for="champ-indicateur">Indicateur</label>
+                <input type="text" id="champ-indicateur" placeholder="Exemple : RSI, MACD, EMA">
+            </div>
+
+            <div class="field">
+                <label for="champ-intervalle">Intervalle</label>
+                <input type="text" id="champ-intervalle" placeholder="Exemple : 1, 5, 60, D, W">
+            </div>
+
+            <div class="field">
+                <label for="champ-categorie">Catégorie</label>
+                <input type="text" id="champ-categorie" placeholder="Exemple : analyse_technique">
+            </div>
+        </div>
+    </section>
 
     <section class="card">
         <h2>Données concrètes du marché</h2>
@@ -343,6 +369,57 @@
         return element ? element.value : valeurDefaut;
     }
 
+    function remplirChampsConfigurationPrincipale(config) {
+        if (!config) {
+            return;
+        }
+
+        const graphique = config.graphique || {};
+        const analyseIA = config.analyseIA || {};
+
+        document.getElementById("champ-actif").value =
+            graphique.actif || "";
+
+        document.getElementById("champ-indicateur").value =
+            graphique.indicateur || "";
+
+        document.getElementById("champ-intervalle").value =
+            graphique.intervalle || "";
+
+        document.getElementById("champ-categorie").value =
+            analyseIA.categorie || "";
+    }
+
+    function ajouterConfigurationPrincipaleDansJSON() {
+        if (!configuration) {
+            return;
+        }
+
+        if (!configuration.graphique) {
+            configuration.graphique = {};
+        }
+
+        if (!configuration.analyseIA) {
+            configuration.analyseIA = {};
+        }
+
+        configuration.graphique.actif =
+            valeurChamp("champ-actif", configuration.graphique.actif || "");
+
+        configuration.graphique.indicateur =
+            valeurChamp("champ-indicateur", configuration.graphique.indicateur || "");
+
+        configuration.graphique.intervalle =
+            valeurChamp("champ-intervalle", configuration.graphique.intervalle || "");
+
+        configuration.analyseIA.categorie =
+            valeurChamp("champ-categorie", configuration.analyseIA.categorie || "");
+
+        localStorage.setItem("configurationTradingViewIA", JSON.stringify(configuration));
+
+        afficherConfiguration(configuration);
+    }
+
     function ouvrirChoixFichierJSON() {
         const input = document.getElementById("fichier-json");
 
@@ -389,6 +466,8 @@
 
                 configuration = objet;
 
+                remplirChampsConfigurationPrincipale(configuration);
+                remplirChampsMarcheDepuisConfiguration(configuration);
                 afficherConfiguration(configuration);
 
                 document.getElementById("fichier-selectionne").textContent =
@@ -438,8 +517,9 @@
                 throw new Error("La sauvegarde locale ne contient pas de bloc 'graphique'.");
             }
 
-            afficherConfiguration(configuration);
+            remplirChampsConfigurationPrincipale(configuration);
             remplirChampsMarcheDepuisConfiguration(configuration);
+            afficherConfiguration(configuration);
 
             document.getElementById("fichier-selectionne").textContent =
                 "Sauvegarde locale chargée.";
@@ -490,6 +570,8 @@
             afficherResultatAnalyse("Aucune configuration valide à actualiser.");
             return;
         }
+
+        ajouterConfigurationPrincipaleDansJSON();
 
         const apiMarche = obtenirApiMarcheDepuisConfiguration();
 
@@ -543,11 +625,16 @@
 
             localStorage.setItem("configurationTradingViewIA", JSON.stringify(configuration));
 
+            remplirChampsConfigurationPrincipale(configuration);
             remplirChampsMarcheDepuisConfiguration(configuration);
             afficherConfiguration(configuration);
 
             afficherResultatAnalyse(
                 "Données concrètes du marché actualisées.\n\n" +
+                "Actif : " + configuration.graphique.actif + "\n" +
+                "Indicateur : " + configuration.graphique.indicateur + "\n" +
+                "Intervalle : " + configuration.graphique.intervalle + "\n" +
+                "Catégorie : " + (configuration.analyseIA?.categorie || "analyse_technique") + "\n\n" +
                 "Prix actuel : " + configuration.marche.prixActuel + "\n" +
                 "Support : " + configuration.marche.support + "\n" +
                 "Résistance : " + configuration.marche.resistance + "\n" +
@@ -560,6 +647,7 @@
             analyserDecision();
 
         } catch (erreur) {
+            remplirChampsConfigurationPrincipale(configuration);
             remplirChampsMarcheDepuisConfiguration(configuration);
             afficherConfiguration(configuration);
 
@@ -640,6 +728,7 @@
             return;
         }
 
+        ajouterConfigurationPrincipaleDansJSON();
         ajouterMarcheDansConfiguration();
 
         const graphique = configuration.graphique || {};
@@ -794,12 +883,12 @@
             "Signal proposé : " + symbole + " " + decision + "\n" +
             "Confiance estimée : " + confiance + " %\n\n" +
 
-            "ACTIF\n" +
-            "-----\n" +
+            "PARAMÈTRES\n" +
+            "----------\n" +
             "Actif : " + (graphique.actifLibelle || graphique.actif || "Non défini") + "\n" +
             "Code actif : " + (graphique.actif || "Non défini") + "\n" +
-            "Intervalle : " + (graphique.intervalleLibelle || graphique.intervalle || "Non défini") + "\n" +
             "Indicateur : " + (graphique.indicateur || "Non défini") + "\n" +
+            "Intervalle : " + (graphique.intervalleLibelle || graphique.intervalle || "Non défini") + "\n" +
             "Catégorie : " + (analyseIA.categorieLibelle || analyseIA.categorie || "Non définie") + "\n" +
             "Snapshot : " + (snapshot.url || "Aucun snapshot lié") + "\n\n" +
 
