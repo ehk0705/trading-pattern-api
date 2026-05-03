@@ -516,17 +516,17 @@
             </select>
         </div>
 
-        <button class="btn-tv" onclick="ouvrirTradingView()" title="Ouvre TradingView avec l’actif et l’intervalle sélectionnés.">Ouvrir dans TradingView</button>
+        <!--<button class="btn-tv" onclick="ouvrirTradingView()" title="Ouvre TradingView avec l’actif et l’intervalle sélectionnés.">Ouvrir dans TradingView</button>-->
         <button class="btn-capture" onclick="capturerConfigurationTradingView()" title="Capture la configuration actuelle, y compris la catégorie d’analyse choisie.">Capturer configuration</button>
-        <button class="btn-market" onclick="enrichirConfigurationAvecDonneesMarche()" title="Ajoute prix actuel, support, résistance, RSI, volume et tendance à la configuration.">Ajouter marché</button>
+        <button class="btn-market" onclick="enrichirConfigurationAvecDonneesMarche()" title="Ajoute prix actuel, support, résistance, RSI, volume et tendance à la configuration." style="display:none;">Ajouter marché</button>
         <button class="btn-save" onclick="sauvegarderConfiguration()" title="Sauvegarde la configuration capturée dans le navigateur.">Sauvegarder</button>
         <button class="btn-save" onclick="rechargerConfigurationTradingView()" title="Recharge la dernière configuration sauvegardée localement.">Recharger</button>
-        <button class="btn-copy" onclick="copierConfiguration()" title="Copie la configuration actuelle au format JSON.">Copier JSON</button>
+        <!--<button class="btn-copy" onclick="copierConfiguration()" title="Copie la configuration actuelle au format JSON.">Copier JSON</button> -->
         <button class="btn-export" onclick="exporterJSON()" title="Exporte la configuration dans un fichier JSON.">Exporter JSON</button>
         <button class="btn-import" onclick="ouvrirImportJSON()" title="Importe une configuration JSON déjà sauvegardée.">Importer JSON</button>
-        <button class="btn-api" onclick="envoyerVersAPI()" title="Envoie la configuration brute au serveur Node.js sur Render.">Envoyer IA</button>
-        <button class="btn-ai" onclick="analyserSnapshotIA()" title="Analyse la configuration ou le snapshot chargé selon la catégorie choisie.">Analyse IA</button>
-        <button class="btn-decision" onclick="ouvrirPageDecision()" title="Ouvre une page dédiée aux décisions IA : acheter, vendre ou attendre.">Page décisions</button>
+        <!--<button class="btn-api" onclick="envoyerVersAPI()" title="Envoie la configuration brute au serveur Node.js sur Render.">Envoyer IA</button> -->
+        <!--<button class="btn-ai" onclick="analyserSnapshotIA()" title="Analyse la configuration ou le snapshot chargé selon la catégorie choisie.">Analyse IA</button>-->
+        <button class="btn-decision" onclick="ouvrirPageDecision()" title="Ouvre une page dédiée aux décisions IA : acheter, vendre ou attendre.">Aide à la décision</button>
         <button class="btn-clear" onclick="effacerConfiguration()" title="Efface la configuration affichée et les résultats de l’analyse IA.">Effacer</button>
     </div>
 </header>
@@ -555,7 +555,7 @@
         <div class="note">
             Cette page capture les paramètres contrôlés par ton interface : actif, intervalle,
             indicateur, stratégie, risque, catégorie d’analyse et lien de snapshot.
-            Le bouton Ajouter marché complète ensuite le JSON avec prix actuel, support, résistance, RSI, volume et tendance via /api/marche.
+            La capture ajoute automatiquement au JSON le prix actuel, le support, la résistance, le RSI, le volume et la tendance via /api/marche.
         </div>
     </section>
 
@@ -944,7 +944,7 @@ Aucun test effectué.
         }
     }
 
-    function capturerConfigurationTradingView() {
+    async function capturerConfigurationTradingView(ajouterMarcheAutomatiquement = true) {
         const actifSelect = document.getElementById("asset-selector");
         const intervalleSelect = document.getElementById("interval-selector");
         const indicateurSelect = document.getElementById("indicator-selector");
@@ -1009,8 +1009,13 @@ Aucun test effectué.
         };
 
         afficherConfiguration(configurationActuelle);
-        afficherStatus("Configuration et catégorie d’analyse capturées avec succès.");
-        alert("Configuration capturée avec la catégorie d’analyse.");
+
+        if (ajouterMarcheAutomatiquement) {
+            afficherStatus("Configuration capturée. Ajout automatique des données de marché en cours...");
+            await enrichirConfigurationAvecDonneesMarche({ silencieux: true });
+        } else {
+            afficherStatus("Configuration et catégorie d’analyse capturées avec succès.");
+        }
     }
 
     function afficherConfiguration(configuration) {
@@ -1022,9 +1027,11 @@ Aucun test effectué.
         document.getElementById("status").textContent = message;
     }
 
-    async function enrichirConfigurationAvecDonneesMarche() {
+    async function enrichirConfigurationAvecDonneesMarche(options = {}) {
+        const silencieux = options.silencieux === true;
+
         if (!configurationActuelle) {
-            capturerConfigurationTradingView();
+            await capturerConfigurationTradingView(false);
         }
 
         const actif = configurationActuelle.graphique.actif;
@@ -1087,7 +1094,9 @@ Aucun test effectué.
                 JSON.stringify(configurationActuelle.marche, null, 4)
             );
 
-            alert("Données de marché ajoutées à la configuration.");
+            if (!silencieux) {
+                alert("Données de marché ajoutées à la configuration.");
+            }
 
         } catch (erreur) {
             afficherStatus("Impossible de récupérer les données de marché.");
@@ -1106,13 +1115,15 @@ Aucun test effectué.
                 erreur.message
             );
 
-            alert("Impossible d’ajouter les données de marché.");
+            if (!silencieux) {
+                alert("Impossible d’ajouter les données de marché.");
+            }
         }
     }
 
-    function sauvegarderConfiguration() {
+    async function sauvegarderConfiguration() {
         if (!configurationActuelle) {
-            capturerConfigurationTradingView();
+            await capturerConfigurationTradingView();
         }
 
         localStorage.setItem("configurationTradingViewIA", JSON.stringify(configurationActuelle));
@@ -1121,7 +1132,7 @@ Aucun test effectué.
         alert("Configuration sauvegardée.");
     }
 
-    function rechargerConfigurationTradingView() {
+    async function rechargerConfigurationTradingView() {
         const data = localStorage.getItem("configurationTradingViewIA");
 
         if (!data) {
@@ -1134,9 +1145,11 @@ Aucun test effectué.
 
             appliquerConfiguration(configurationActuelle);
             afficherConfiguration(configurationActuelle);
-            afficherStatus("Configuration rechargée.");
+            afficherStatus("Configuration rechargée. Actualisation des données de marché en cours...");
 
-            alert("Configuration rechargée.");
+            await enrichirConfigurationAvecDonneesMarche({ silencieux: true });
+
+            alert("Configuration rechargée et données de marché actualisées.");
         } catch (erreur) {
             alert("Erreur : configuration sauvegardée invalide.");
         }
@@ -1189,9 +1202,9 @@ Aucun test effectué.
         }
     }
 
-    function copierConfiguration() {
+    async function copierConfiguration() {
         if (!configurationActuelle) {
-            capturerConfigurationTradingView();
+            await capturerConfigurationTradingView();
         }
 
         const texte = JSON.stringify(configurationActuelle, null, 4);
@@ -1238,9 +1251,9 @@ Aucun test effectué.
         return actif + "-" + indicateur + "-" + intervalle + "-" + categorie + "-" + timestamp + ".json";
     }
 
-    function exporterJSON() {
+    async function exporterJSON() {
         if (!configurationActuelle) {
-            capturerConfigurationTradingView();
+            await capturerConfigurationTradingView();
         }
 
         const contenu = JSON.stringify(configurationActuelle, null, 4);
@@ -1270,7 +1283,7 @@ Aucun test effectué.
 
         const lecteur = new FileReader();
 
-        lecteur.onload = function(e) {
+        lecteur.onload = async function(e) {
             try {
                 const contenu = e.target.result;
                 const configuration = JSON.parse(contenu);
@@ -1286,8 +1299,11 @@ Aucun test effectué.
 
                 localStorage.setItem("configurationTradingViewIA", JSON.stringify(configurationActuelle));
 
-                afficherStatus("Configuration JSON importée avec sa catégorie d’analyse.");
-                alert("Configuration JSON importée avec succès.");
+                afficherStatus("Configuration JSON importée. Actualisation des données de marché en cours...");
+
+                await enrichirConfigurationAvecDonneesMarche({ silencieux: true });
+
+                alert("Configuration JSON importée et données de marché actualisées.");
 
             } catch (erreur) {
                 alert("Import impossible. Le fichier JSON est invalide.\n\nDétail : " + erreur.message);
@@ -1370,7 +1386,7 @@ Aucun test effectué.
 
     async function analyserSnapshotIA() {
         if (!configurationActuelle) {
-            capturerConfigurationTradingView();
+            await capturerConfigurationTradingView();
         }
 
         afficherAnalyseIA("Analyse IA en cours...");
@@ -1437,10 +1453,16 @@ Aucun test effectué.
         }
     }
 
-    function ouvrirPageDecision() {
-        if (!configurationActuelle) {
-            capturerConfigurationTradingView();
-        }
+    async function ouvrirPageDecision() {
+        afficherStatus("Capture de la configuration courante avant ouverture de la page décisions...");
+
+        await capturerConfigurationTradingView(false);
+
+        afficherStatus("Actualisation des données de marché avant ouverture de la page décisions...");
+
+        await enrichirConfigurationAvecDonneesMarche({
+            silencieux: true
+        });
 
         localStorage.setItem("configurationTradingViewIA", JSON.stringify(configurationActuelle));
 
@@ -1465,7 +1487,7 @@ Aucun test effectué.
 
     async function envoyerVersAPI() {
         if (!configurationActuelle) {
-            capturerConfigurationTradingView();
+            await capturerConfigurationTradingView();
         }
 
         const apiUrl = getApiAnalyseUrl();

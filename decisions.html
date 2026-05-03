@@ -240,8 +240,8 @@
         </div>
 
         <p class="info">
-            Charge un fichier JSON depuis ton dossier <strong>/snapshots</strong>, puis complète ou corrige les prix concrets ci-dessous.
-            Les calculs deviennent plus précis lorsque le prix actuel, le support, la résistance, le RSI, le volume et la tendance sont renseignés.
+            Charge un fichier JSON depuis ton dossier <strong>/snapshots</strong>, ou charge la dernière sauvegarde locale.
+            Les données concrètes du marché sont maintenant rafraîchies automatiquement depuis le serveur avant l’analyse.
         </p>
     </div>
 
@@ -319,6 +319,15 @@
         box.textContent = decision;
     }
 
+    function afficherConfiguration(config) {
+        document.getElementById("configuration-json").textContent =
+            JSON.stringify(config, null, 4);
+    }
+
+    function afficherResultatAnalyse(texte) {
+        document.getElementById("resultat-analyse").textContent = texte;
+    }
+
     function nombreChamp(id) {
         const element = document.getElementById(id);
 
@@ -345,7 +354,11 @@
         input.click();
     }
 
-    function chargerConfigurationDepuisFichier(event) {
+    function chargerConfiguration() {
+        ouvrirChoixFichierJSON();
+    }
+
+    async function chargerConfigurationDepuisFichier(event) {
         const fichier = event.target.files[0];
 
         if (!fichier) {
@@ -355,18 +368,17 @@
         if (!fichier.name.toLowerCase().endsWith(".json")) {
             afficherDecision("Fichier invalide", "erreur");
 
-            document.getElementById("configuration-json").textContent =
-                "Erreur : le fichier choisi n’est pas un fichier JSON.";
+            afficherConfiguration({
+                erreur: "Le fichier choisi n’est pas un fichier JSON."
+            });
 
-            document.getElementById("resultat-analyse").textContent =
-                "Impossible d’analyser ce fichier.";
-
+            afficherResultatAnalyse("Impossible d’analyser ce fichier.");
             return;
         }
 
         const lecteur = new FileReader();
 
-        lecteur.onload = function(e) {
+        lecteur.onload = async function(e) {
             try {
                 const contenu = e.target.result;
                 const objet = JSON.parse(contenu);
@@ -377,20 +389,19 @@
 
                 configuration = objet;
 
-                remplirChampsMarcheDepuisConfiguration(configuration);
-
-                localStorage.setItem("configurationTradingViewIA", JSON.stringify(configuration));
-
-                document.getElementById("configuration-json").textContent =
-                    JSON.stringify(configuration, null, 4);
+                afficherConfiguration(configuration);
 
                 document.getElementById("fichier-selectionne").textContent =
                     "Fichier chargé : " + fichier.name;
 
-                document.getElementById("resultat-analyse").textContent =
-                    "Configuration JSON chargée. Vérifie les prix concrets, puis clique sur « Analyser décision ».";
-
                 afficherDecision("Configuration JSON chargée", "attente");
+
+                afficherResultatAnalyse(
+                    "Configuration JSON chargée.\n" +
+                    "Actualisation automatique des données concrètes du marché en cours..."
+                );
+
+                await rafraichirDonneesMarcheDecision();
 
             } catch (erreur) {
                 configuration = null;
@@ -401,8 +412,9 @@
                     "Erreur : fichier JSON invalide.\n\n" +
                     "Détail technique : " + erreur.message;
 
-                document.getElementById("resultat-analyse").textContent =
-                    "Impossible d’analyser une configuration invalide.";
+                afficherResultatAnalyse(
+                    "Impossible d’analyser une configuration invalide."
+                );
             }
 
             event.target.value = "";
@@ -411,87 +423,184 @@
         lecteur.readAsText(fichier);
     }
 
-    function chargerConfigurationLocale() {
-        const zoneConfiguration = document.getElementById("configuration-json");
-        const zoneAnalyse = document.getElementById("resultat-analyse");
-
+    async function chargerConfigurationLocale() {
         const data = localStorage.getItem("configurationTradingViewIA");
 
         if (!data) {
-            configuration = null;
-
-            afficherDecision("Aucune configuration", "erreur");
-
-            zoneConfiguration.textContent =
-                "Aucune configuration locale trouvée.\n\n" +
-                "Solutions :\n" +
-                "1. Retourne dans analyse-config-ia.html puis fais Capturer configuration et Sauvegarder.\n" +
-                "2. Ou clique sur Charger configuration JSON pour choisir un fichier dans /snapshots.";
-
-            zoneAnalyse.textContent =
-                "Impossible d’analyser : aucune configuration n’est disponible.";
-
+            alert("Aucune sauvegarde locale trouvée.");
             return;
         }
 
         try {
             configuration = JSON.parse(data);
 
+            if (!configuration.graphique) {
+                throw new Error("La sauvegarde locale ne contient pas de bloc 'graphique'.");
+            }
+
+            afficherConfiguration(configuration);
             remplirChampsMarcheDepuisConfiguration(configuration);
 
-            zoneConfiguration.textContent =
-                JSON.stringify(configuration, null, 4);
-
             document.getElementById("fichier-selectionne").textContent =
-                "Configuration chargée depuis la sauvegarde locale du navigateur.";
+                "Sauvegarde locale chargée.";
 
-            afficherDecision("Configuration locale chargée", "attente");
+            afficherDecision("Sauvegarde locale chargée", "attente");
 
-            zoneAnalyse.textContent =
-                "Configuration locale chargée. Vérifie les prix concrets, puis clique sur « Analyser décision ».";
+            afficherResultatAnalyse(
+                "Sauvegarde locale chargée.\n" +
+                "Actualisation automatique des données concrètes du marché en cours..."
+            );
+
+            await rafraichirDonneesMarcheDecision();
 
         } catch (erreur) {
             configuration = null;
 
-            afficherDecision("Configuration invalide", "erreur");
+            afficherDecision("Sauvegarde invalide", "erreur");
 
-            zoneConfiguration.textContent =
-                "Erreur : la configuration sauvegardée est invalide.\n\n" +
-                "Détail technique : " + erreur.message;
+            afficherResultatAnalyse(
+                "Sauvegarde locale invalide.\n\n" +
+                "Détail technique : " + erreur.message
+            );
 
-            zoneAnalyse.textContent =
-                "Impossible d’analyser une configuration invalide.";
+            alert("Sauvegarde locale invalide.");
         }
     }
 
-    function chargerConfiguration() {
-        ouvrirChoixFichierJSON();
+    function obtenirApiAnalyseDepuisConfiguration() {
+        if (configuration && configuration.serveur && configuration.serveur.apiAnalyse) {
+            return configuration.serveur.apiAnalyse;
+        }
+
+        return "https://trading-pattern-api.onrender.com/api/analyse";
+    }
+
+    function obtenirApiMarcheDepuisConfiguration() {
+        if (configuration && configuration.serveur && configuration.serveur.apiMarche) {
+            return configuration.serveur.apiMarche;
+        }
+
+        const apiAnalyse = obtenirApiAnalyseDepuisConfiguration();
+        return apiAnalyse.replace(/\/api\/analyse\/?$/, "/api/marche");
+    }
+
+    async function rafraichirDonneesMarcheDecision() {
+        if (!configuration || !configuration.graphique) {
+            afficherDecision("Aucune configuration valide", "erreur");
+            afficherResultatAnalyse("Aucune configuration valide à actualiser.");
+            return;
+        }
+
+        const apiMarche = obtenirApiMarcheDepuisConfiguration();
+
+        try {
+            afficherDecision("Actualisation marché...", "attente");
+
+            afficherResultatAnalyse(
+                "Actualisation des données concrètes du marché en cours...\n\n" +
+                "Adresse appelée :\n" +
+                apiMarche
+            );
+
+            const reponse = await fetch(apiMarche, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                cache: "no-store",
+                body: JSON.stringify({
+                    actif: configuration.graphique.actif,
+                    intervalle: configuration.graphique.intervalle,
+                    indicateur: configuration.graphique.indicateur,
+                    categorieAnalyse: configuration.analyseIA?.categorie || "analyse_technique"
+                })
+            });
+
+            const texte = await reponse.text();
+            let donneesMarche;
+
+            try {
+                donneesMarche = JSON.parse(texte);
+            } catch (erreurJson) {
+                throw new Error("Le serveur n’a pas retourné du JSON. Réponse reçue : " + texte);
+            }
+
+            if (!reponse.ok) {
+                throw new Error("Réponse HTTP " + reponse.status + " : " + JSON.stringify(donneesMarche));
+            }
+
+            configuration.marche = {
+                prixActuel: donneesMarche.prixActuel ?? null,
+                support: donneesMarche.support ?? null,
+                resistance: donneesMarche.resistance ?? null,
+                rsi: donneesMarche.rsi ?? null,
+                volume: donneesMarche.volume ?? "neutre",
+                tendance: donneesMarche.tendance ?? "neutre",
+                source: donneesMarche.source ?? "serveur_nodejs",
+                api: apiMarche,
+                dateMiseAJour: new Date().toISOString()
+            };
+
+            localStorage.setItem("configurationTradingViewIA", JSON.stringify(configuration));
+
+            remplirChampsMarcheDepuisConfiguration(configuration);
+            afficherConfiguration(configuration);
+
+            afficherResultatAnalyse(
+                "Données concrètes du marché actualisées.\n\n" +
+                "Prix actuel : " + configuration.marche.prixActuel + "\n" +
+                "Support : " + configuration.marche.support + "\n" +
+                "Résistance : " + configuration.marche.resistance + "\n" +
+                "RSI : " + configuration.marche.rsi + "\n" +
+                "Volume : " + configuration.marche.volume + "\n" +
+                "Tendance : " + configuration.marche.tendance + "\n\n" +
+                "Analyse de décision lancée automatiquement..."
+            );
+
+            analyserDecision();
+
+        } catch (erreur) {
+            remplirChampsMarcheDepuisConfiguration(configuration);
+            afficherConfiguration(configuration);
+
+            afficherDecision("Erreur marché", "erreur");
+
+            afficherResultatAnalyse(
+                "Impossible de rafraîchir les données concrètes du marché.\n\n" +
+                "La décision peut encore être calculée avec les anciennes données présentes dans le JSON, " +
+                "ou avec les valeurs saisies manuellement.\n\n" +
+                "Adresse appelée :\n" +
+                apiMarche + "\n\n" +
+                "Détail technique :\n" +
+                erreur.message
+            );
+        }
     }
 
     function remplirChampsMarcheDepuisConfiguration(config) {
         const marche = config.marche || {};
 
-        if (marche.prixActuel !== undefined) {
+        if (marche.prixActuel !== undefined && marche.prixActuel !== null) {
             document.getElementById("prix-actuel").value = marche.prixActuel;
         }
 
-        if (marche.support !== undefined) {
+        if (marche.support !== undefined && marche.support !== null) {
             document.getElementById("support").value = marche.support;
         }
 
-        if (marche.resistance !== undefined) {
+        if (marche.resistance !== undefined && marche.resistance !== null) {
             document.getElementById("resistance").value = marche.resistance;
         }
 
-        if (marche.rsi !== undefined) {
+        if (marche.rsi !== undefined && marche.rsi !== null) {
             document.getElementById("rsi").value = marche.rsi;
         }
 
-        if (marche.volume !== undefined) {
+        if (marche.volume !== undefined && marche.volume !== null) {
             document.getElementById("volume").value = marche.volume;
         }
 
-        if (marche.tendance !== undefined) {
+        if (marche.tendance !== undefined && marche.tendance !== null) {
             document.getElementById("tendance").value = marche.tendance;
         }
     }
@@ -508,21 +617,24 @@
             rsi: nombreChamp("rsi"),
             volume: valeurChamp("volume", "neutre"),
             tendance: valeurChamp("tendance", "neutre"),
-            dateMiseAJour: new Date().toISOString()
+            source: configuration.marche?.source || "saisie_page_decision",
+            api: configuration.marche?.api || obtenirApiMarcheDepuisConfiguration(),
+            dateMiseAJour: configuration.marche?.dateMiseAJour || new Date().toISOString(),
+            dateVerificationDecision: new Date().toISOString()
         };
 
         localStorage.setItem("configurationTradingViewIA", JSON.stringify(configuration));
 
-        document.getElementById("configuration-json").textContent =
-            JSON.stringify(configuration, null, 4);
+        afficherConfiguration(configuration);
     }
 
     function analyserDecision() {
         if (!configuration) {
-            document.getElementById("resultat-analyse").textContent =
+            afficherResultatAnalyse(
                 "Aucune configuration n’est chargée.\n\n" +
                 "Clique d’abord sur « Charger configuration JSON » et choisis un fichier dans /snapshots,\n" +
-                "ou clique sur « Charger sauvegarde locale ».";
+                "ou clique sur « Charger sauvegarde locale »."
+            );
 
             afficherDecision("Aucune configuration", "erreur");
             return;
@@ -546,13 +658,14 @@
         if (!prixActuel || !support || !resistance) {
             afficherDecision("Données insuffisantes", "erreur");
 
-            document.getElementById("resultat-analyse").textContent =
+            afficherResultatAnalyse(
                 "Données insuffisantes.\n\n" +
                 "Pour obtenir une décision concrète, tu dois renseigner au minimum :\n" +
                 "- Prix actuel\n" +
                 "- Support principal\n" +
                 "- Résistance principale\n\n" +
-                "Sans ces prix, la page ne peut pas calculer une entrée, un stop loss et des objectifs fiables.";
+                "Sans ces prix, la page ne peut pas calculer une entrée, un stop loss et des objectifs fiables."
+            );
 
             return;
         }
@@ -674,7 +787,7 @@
 
         afficherDecision(symbole + " " + decision, classe);
 
-        document.getElementById("resultat-analyse").textContent =
+        afficherResultatAnalyse(
             "DÉCISION IA CONCRÈTE\n" +
             "====================\n\n" +
 
@@ -697,7 +810,9 @@
             "Résistance : " + resistance + "\n" +
             "RSI : " + (isNaN(rsi) ? "Non renseigné" : rsi) + "\n" +
             "Volume : " + volume + "\n" +
-            "Tendance : " + tendance + "\n\n" +
+            "Tendance : " + tendance + "\n" +
+            "Date mise à jour marché : " + (marche.dateMiseAJour || "Non disponible") + "\n" +
+            "Source marché : " + (marche.source || "Non disponible") + "\n\n" +
 
             "PLAN PROPOSÉ\n" +
             "------------\n" +
@@ -717,8 +832,10 @@
 
             "\n\nNOTE\n" +
             "----\n" +
-            "Cette décision est calculée à partir des prix que tu as fournis dans cette page. " +
-            "Elle doit être vérifiée avec le graphique réel avant toute opération.";
+            "Cette décision est calculée à partir des données concrètes du marché rafraîchies, " +
+            "ou des valeurs saisies manuellement si le serveur n’a pas répondu. " +
+            "Elle doit être vérifiée avec le graphique réel avant toute opération."
+        );
     }
 
     function calculerPlanTrading(decision, prixActuel, support, resistance) {
@@ -787,7 +904,7 @@
     }
 
     function retour() {
-        window.location.href = "analyse-config-ia.html";
+        window.location.href = "analyse-config-ia-marche.html";
     }
 
     window.chargerConfiguration = chargerConfiguration;
