@@ -1,23 +1,44 @@
 /*
-    Serveur Node.js pour l'analyse IA des patterns et des configurations TradingView
-    --------------------------------------------------------------------------------
+    Serveur Node.js pour l'analyse IA des patterns,
+    des configurations TradingView et des captures PostgreSQL
+    ----------------------------------------------------------------
+    Version corrigée : un seul serveur Express
 */
 
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
+const { Pool } = require("pg");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+/*
+    Middleware
+*/
 app.use(cors({
     origin: "*",
     methods: ["GET", "POST", "OPTIONS"],
     allowedHeaders: ["Content-Type"]
 }));
 
-app.use(express.json({ limit: "5mb" }));
+app.use(express.json({ limit: "25mb" }));
+app.use(express.urlencoded({ extended: true, limit: "25mb" }));
+
+/*
+    Fichiers statiques éventuels
+*/
 app.use(express.static(path.join(__dirname)));
+
+/*
+    Connexion PostgreSQL Render
+*/
+const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: process.env.DATABASE_URL
+        ? { rejectUnauthorized: false }
+        : false
+});
 
 /*
     Route principale
@@ -25,12 +46,16 @@ app.use(express.static(path.join(__dirname)));
 app.get("/", (req, res) => {
     res.json({
         ok: true,
-        message: "Serveur Node.js actif.",
+        statut: "ok",
+        message: "Serveur Trading API actif.",
         routes: [
             "GET /api/test",
             "POST /api/analyse",
             "POST /api/marche",
-            "POST /api/analyse-pattern"
+            "POST /api/analyse-pattern",
+            "POST /api/captures",
+            "GET /api/captures",
+            "GET /api/captures/:id"
         ],
         date: new Date().toISOString()
     });
@@ -208,6 +233,171 @@ app.post("/api/analyse-pattern", async (req, res) => {
             statut: "erreur",
             message: "Erreur pendant l'analyse du pattern.",
             detail: err.message
+        });
+    }
+});
+
+/*
+    Enregistrement d'une capture dans PostgreSQL
+*/
+app.post("/api/captures", async (req, res) => {
+    try {
+        if (!process.env.DATABASE_URL) {
+            return res.status(500).json({
+                statut: "erreur",
+                message: "DATABASE_URL n'est pas configurée sur Render."
+            });
+        }
+
+        const {
+            actif,
+            indicateur,
+            intervalle,
+            nom_fichier,
+            configuration_json,
+            screenshot_base64
+        } = req.body || {};
+
+        if (!actif || !configuration_json) {
+            return res.status(400).json({
+                statut: "erreur",
+                message: "Les champs actif et configuration_json sont obligatoires."
+            });
+        }
+
+        const resultat = await pool.query(
+            `
+            INSERT INTO trading_capture
+            (
+                actif,
+                indicateur,
+                intervalle,
+                nom_fichier,
+                configuration_json,
+                screenshot_base64
+            )
+            VALUES ($1, $2, $3, $4, $5, $6)
+            RETURNING id, date_capture
+            `,
+            [
+                actif,
+                indicateur || null,
+                intervalle || null,
+                nom_fichier || null,
+                configuration_json,
+                screenshot_base64 || null
+            ]
+        );
+
+        res.json({
+            statut: "ok",
+            message: "Capture enregistrée.",
+            capture: resultat.rows[0]
+        });
+
+    } catch (erreur) {
+        console.error("Erreur POST /api/captures :", erreur);
+
+        res.status(500).json({
+            statut: "erreur",
+            message: "Erreur lors de l'enregistrement de la capture.",
+            detail: erreur.message
+        });
+    }
+});
+
+/*
+    Liste des captures
+*/
+app.get("/api/captures", async (req, res) => {
+    try {
+        if (!process.env.DATABASE_URL) {
+            return res.status(500).json({
+                statut: "erreur",
+                message: "DATABASE_URL n'est pas configurée sur Render."
+            });
+        }
+
+        const resultat = await pool.query(
+            `
+            SELECT
+                id,
+                actif,
+                indicateur,
+                intervalle,
+                nom_fichier,
+                date_capture
+            FROM trading_capture
+            ORDER BY date_capture DESC
+            LIMIT 100
+            `
+        );
+
+        res.json({
+            statut: "ok",
+            captures: resultat.rows
+        });
+
+    } catch (erreur) {
+        console.error("Erreur GET /api/captures :", erreur);
+
+        res.status(500).json({
+            statut: "erreur",
+            message: "Impossible de charger les captures.",
+            detail: erreur.message
+        });
+    }
+});
+
+/*
+    Chargement d'une capture précise
+*/
+app.get("/api/captures/:id", async (req, res) => {
+    try {
+        if (!process.env.DATABASE_URL) {
+            return res.status(500).json({
+                statut: "erreur",
+                message: "DATABASE_URL n'est pas configurée sur Render."
+            });
+        }
+
+        const id = Number(req.params.id);
+
+        if (!Number.isInteger(id) || id <= 0) {
+            return res.status(400).json({
+                statut: "erreur",
+                message: "Identifiant invalide."
+            });
+        }
+
+        const resultat = await pool.query(
+            `
+            SELECT *
+            FROM trading_capture
+            WHERE id = $1
+            `,
+            [id]
+        );
+
+        if (resultat.rows.length === 0) {
+            return res.status(404).json({
+                statut: "erreur",
+                message: "Capture introuvable."
+            });
+        }
+
+        res.json({
+            statut: "ok",
+            capture: resultat.rows[0]
+        });
+
+    } catch (erreur) {
+        console.error("Erreur GET /api/captures/:id :", erreur);
+
+        res.status(500).json({
+            statut: "erreur",
+            message: "Impossible de charger la capture.",
+            detail: erreur.message
         });
     }
 });
@@ -469,9 +659,16 @@ async function recupererBougiesBinance(symbole, intervalle, limite) {
 /*
     Analyse de similarité
 */
-function analyserSimilarite({ actif, symbole, intervalle, bougies, longueurPattern, horizon, seuil }) {
+function analyserSimilarite({
+    actif,
+    symbole,
+    intervalle,
+    bougies,
+    longueurPattern,
+    horizon,
+    seuil
+}) {
     const closes = bougies.map(b => b.close);
-    const volumes = bougies.map(b => b.volume);
 
     const rsiSeries = calculerRSISeries(closes, 14);
     const ema20Series = calculerEMASeries(closes, 20);
@@ -598,7 +795,15 @@ function analyserSimilarite({ actif, symbole, intervalle, bougies, longueurPatte
     };
 }
 
-function extraireFeatures(bougies, rsiSeries, ema20Series, ema50Series, macdSeries, debut, longueur) {
+function extraireFeatures(
+    bougies,
+    rsiSeries,
+    ema20Series,
+    ema50Series,
+    macdSeries,
+    debut,
+    longueur
+) {
     const fin = debut + longueur;
 
     if (debut < 0 || fin > bougies.length) {
@@ -758,7 +963,14 @@ function calculerMACDSeries(closes) {
     };
 }
 
-function extraireIndicateursActuels({ closes, rsiSeries, ema20Series, ema50Series, macdSeries, bougies }) {
+function extraireIndicateursActuels({
+    closes,
+    rsiSeries,
+    ema20Series,
+    ema50Series,
+    macdSeries,
+    bougies
+}) {
     const i = closes.length - 1;
 
     const prixActuel = closes[i];
@@ -804,7 +1016,12 @@ function calculerScoreTechnique(indicateurs) {
     return Math.max(0, Math.min(100, Math.round(score)));
 }
 
-function determinerSignal({ pctHausse, pctBaisse, variationMoyenne, scoreTechnique }) {
+function determinerSignal({
+    pctHausse,
+    pctBaisse,
+    variationMoyenne,
+    scoreTechnique
+}) {
     if (pctHausse >= 58 && variationMoyenne > 0 && scoreTechnique >= 55) {
         return {
             signal: "ACHETER",
@@ -825,7 +1042,14 @@ function determinerSignal({ pctHausse, pctBaisse, variationMoyenne, scoreTechniq
     };
 }
 
-function construireResume(signal, pctHausse, pctBaisse, pctNeutre, variationMoyenne, indicateurs) {
+function construireResume(
+    signal,
+    pctHausse,
+    pctBaisse,
+    pctNeutre,
+    variationMoyenne,
+    indicateurs
+) {
     return (
         "Le segment actuel ressemble à des configurations historiques où la hausse a représenté " +
         pctHausse +
@@ -951,8 +1175,42 @@ function arrondir(nombre) {
 }
 
 /*
+    Route introuvable
+*/
+app.use((req, res) => {
+    res.status(404).json({
+        statut: "erreur",
+        message: "Route introuvable.",
+        routeDemandee: req.originalUrl
+    });
+});
+
+/*
     Démarrage serveur
 */
 app.listen(PORT, () => {
     console.log("Serveur lancé sur le port " + PORT);
 });
+
+async function initialiserBase() {
+    try {
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS trading_capture (
+                id SERIAL PRIMARY KEY,
+                actif VARCHAR(100) NOT NULL,
+                indicateur VARCHAR(100),
+                intervalle VARCHAR(50),
+                nom_fichier VARCHAR(255),
+                configuration_json JSONB NOT NULL,
+                screenshot_base64 TEXT,
+                date_capture TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+        `);
+
+        console.log("Table trading_capture prête");
+    } catch (erreur) {
+        console.error("Erreur initialisation base :", erreur);
+    }
+}
+
+initialiserBase();
