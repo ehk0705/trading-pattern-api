@@ -67,6 +67,11 @@
             max-width: 100%;
         }
 
+        textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
         button {
             border: none;
             border-radius: 7px;
@@ -111,31 +116,6 @@
             color: #001a16;
         }
 
-        .btn-api {
-            background: #fb923c;
-            color: #1a0b00;
-        }
-
-        .btn-db {
-            background: #10b981;
-            color: #00130d;
-        }
-
-        .btn-load {
-            background: #6366f1;
-            color: white;
-        }
-
-        .btn-ai {
-            background: #38bdf8;
-            color: #00111a;
-        }
-
-        .btn-market {
-            background: #84cc16;
-            color: #102000;
-        }
-
         .btn-decision {
             background: #eab308;
             color: #1a1300;
@@ -149,6 +129,11 @@
         .btn-dark {
             background: #334155;
             color: white;
+        }
+
+        .btn-screen {
+            background: #f97316;
+            color: #1a0b00;
         }
 
         main {
@@ -346,7 +331,9 @@
             margin-bottom: 6px;
         }
 
-        .analysis-category-box select {
+        .analysis-category-box select,
+        .analysis-category-box input,
+        .analysis-category-box textarea {
             width: 100%;
         }
 
@@ -389,28 +376,25 @@
             color: #d1d5db;
         }
 
-        .screenshot-preview {
-            margin-top: 12px;
-            background: #020617;
-            border: 1px solid #334155;
-            border-radius: 10px;
-            padding: 10px;
-        }
-
-        .screenshot-preview img {
-            width: 100%;
-            max-height: 360px;
-            object-fit: contain;
-            border-radius: 8px;
-            background: #000;
-            display: none;
-        }
-
         .note {
             color: #cbd5e1;
             font-size: 12px;
             line-height: 1.5;
             margin-top: 8px;
+        }
+
+        .preview-box {
+            display: none;
+            margin-top: 10px;
+        }
+
+        .preview-box img {
+            width: 100%;
+            max-height: 260px;
+            object-fit: contain;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            background: #020617;
         }
 
         footer {
@@ -543,19 +527,33 @@
             </select>
         </div>
 
-       <!-- <button class="btn-tv" onclick="ouvrirTradingView()" title="Ouvre TradingView avec l’actif et l’intervalle sélectionnés.">Ouvrir dans TradingView</button> -->
-        <button class="btn-capture" onclick="capturerConfigurationTradingView()" title="Capture la configuration actuelle, y compris la catégorie d’analyse choisie.">Capturer configuration</button>
-       <!--<button class="btn-market" onclick="enrichirConfigurationAvecDonneesMarche()" title="Ajoute prix actuel, support, résistance, RSI, volume et tendance à la configuration.">Ajouter marché</button>-->
-        <button class="btn-save" onclick="sauvegarderConfiguration()" title="Sauvegarde la configuration capturée dans le navigateur.">Sauvegarder</button>
-        <button class="btn-db" onclick="enregistrerCapturePostgres()" title="Enregistre la configuration dans PostgreSQL via l’API Render.">Sauver PostgreSQL</button>
-        <button class="btn-save" onclick="rechargerConfigurationTradingView()" title="Recharge la dernière configuration sauvegardée localement.">Recharger</button>
-      <!--  <button class="btn-copy" onclick="copierConfiguration()" title="Copie la configuration actuelle au format JSON.">Copier JSON</button>-->
-      <!-- <button class="btn-export" onclick="exporterJSON()" title="Exporte la configuration dans un fichier JSON.">Exporter JSON</button>-->
-      <!--  <button class="btn-import" onclick="ouvrirImportJSON()" title="Importe une configuration JSON déjà sauvegardée.">Importer JSON</button>-->
-      <!--<button class="btn-api" onclick="envoyerVersAPI()" title="Envoie la configuration brute au serveur Node.js sur Render.">Envoyer IA</button>-->
-      <!--<button class="btn-ai" onclick="analyserSnapshotIA()" title="Analyse la configuration ou le snapshot chargé selon la catégorie choisie.">Analyse IA</button>-->
-        <button class="btn-decision" onclick="ouvrirPageDecision()" title="Ouvre une page dédiée aux décisions IA : acheter, vendre ou attendre.">Analyser</button>
-      <!--<button class="btn-clear" onclick="effacerConfiguration()" title="Efface la configuration affichée et les résultats de l’analyse IA.">Effacer</button> -->
+        <button class="btn-capture" onclick="capturerConfigurationTradingView()" title="Capture la configuration JSON, les données de marché et le screenshot.">
+            Capturer configuration
+        </button>
+
+        <button class="btn-save" onclick="sauvegarderConfiguration()" title="Sauvegarde la configuration dans le navigateur.">
+            Sauvegarder
+        </button>
+
+        <button class="btn-save" onclick="rechargerConfigurationTradingView()" title="Recharge la dernière configuration sauvegardée localement.">
+            Recharger
+        </button>
+
+        <button class="btn-export" onclick="exporterJSON()" title="Exporte la configuration dans un fichier JSON.">
+            Exporter JSON
+        </button>
+
+        <button class="btn-import" onclick="ouvrirImportJSON()" title="Importe une configuration JSON déjà sauvegardée.">
+            Importer JSON
+        </button>
+
+        <button class="btn-decision" onclick="ouvrirPageDecision()" title="Ouvre une page dédiée aux décisions IA.">
+            Aide à la décision
+        </button>
+
+        <button class="btn-clear" onclick="effacerConfiguration()" title="Efface la configuration affichée.">
+            Effacer
+        </button>
     </div>
 </header>
 
@@ -573,7 +571,13 @@
 
         <div id="tradingview_chart"></div>
 
-        <input type="file" id="fichier-import-json" accept="application/json,.json" style="display:none;" onchange="importerJSONDepuisFichier(event)">
+        <input
+            type="file"
+            id="fichier-import-json"
+            accept="application/json,.json"
+            style="display:none;"
+            onchange="importerJSONDepuisFichier(event)"
+        >
 
         <section class="ai-section">
             <h3>Résultats de l’analyse IA</h3>
@@ -581,13 +585,9 @@
         </section>
 
         <div class="note">
-            Cette page capture les paramètres contrôlés par ton interface : actif, intervalle,
-            indicateur, catégorie d’analyse et lien éventuel de snapshot.
-            Le bouton Sauver PostgreSQL envoie la capture vers /api/captures.
-            La liste déroulante permet ensuite de recharger une capture déjà stockée dans PostgreSQL.
-            Remarque : le navigateur ne peut pas capturer directement l’image interne du graphique TradingView intégré,
-            car TradingView est chargé dans une zone externe protégée. Si un screenshot base64 est ajouté plus tard,
-            il sera aussi envoyé à la base.
+            Cette page capture les paramètres contrôlés par l’interface : actif, intervalle,
+            indicateur, catégorie d’analyse, données de marché et screenshot.
+            Le JSON et le screenshot sont sauvegardés dans le dossier local choisi.
         </div>
     </section>
 
@@ -601,26 +601,18 @@
 
         <div class="form-block">
             <label for="api-url">Adresse API Render</label>
-            <input type="text" id="api-url" value="https://trading-pattern-api.onrender.com/api/analyse"
-                   title="Adresse de l’API Node.js déployée sur Render.">
-        </div>
-
-        <div class="form-block">
-            <label for="liste-captures-postgres">Captures PostgreSQL</label>
-            <select id="liste-captures-postgres" title="Liste des captures chargées depuis la table trading_capture.">
-                <option value="">Aucune capture chargée</option>
-            </select>
+            <input
+                type="text"
+                id="api-url"
+                value="https://trading-pattern-api.onrender.com/api/analyse"
+                title="Adresse de l’API Node.js déployée sur Render."
+            >
         </div>
 
         <div class="button-zone">
-            <button class="btn-load" onclick="chargerListeCapturesPostgres()" title="Charge la liste des captures enregistrées dans PostgreSQL.">Charger liste</button>
-            <button class="btn-db" onclick="chargerCapturePostgresSelectionnee()" title="Recharge la capture PostgreSQL sélectionnée.">Charger capture</button>
-        </div>
-
-        <div class="button-zone">
-            <button class="btn-copy" onclick="testerServeur()" title="Teste la route /api/test du serveur Render.">Tester serveur</button>
-            <button class="btn-dark" onclick="testerRouteAnalyse()" title="Teste directement la route /api/analyse.">Tester /api/analyse</button>
-            <button class="btn-tv" onclick="ouvrirServeurRender()" title="Ouvre l’adresse principale du serveur Render.">Ouvrir serveur</button>
+            <button class="btn-copy" onclick="testerServeur()" type="button">Tester serveur</button>
+            <button class="btn-dark" onclick="testerRouteAnalyse()" type="button">Tester /api/analyse</button>
+            <button class="btn-tv" onclick="ouvrirServeurRender()" type="button">Ouvrir serveur</button>
         </div>
 
         <div id="infosServeur" class="server-info">
@@ -632,7 +624,7 @@ Aucun test effectué.
 
             <label for="categorie-analyse-btc">Choisir une catégorie</label>
 
-            <select id="categorie-analyse-btc" title="Choisir le type d’analyse IA à appliquer au Bitcoin ou au marché.">
+            <select id="categorie-analyse-btc" title="Choisir le type d’analyse IA à appliquer au marché.">
                 <option value="macroeconomie">Macroéconomie</option>
                 <option value="monnaie_bitcoin">Monnaie Bitcoin</option>
                 <option value="donnees_on_chain">Données on-chain</option>
@@ -650,14 +642,61 @@ Aucun test effectué.
             </div>
         </section>
 
+        <section class="analysis-category-box">
+            <h2>Sauvegarde locale</h2>
+
+            <div class="form-block">
+                <label for="capture-nom">Nom unique de la capture</label>
+                <input type="text" id="capture-nom" readonly>
+            </div>
+
+            <div class="form-block">
+                <label for="capture-description">Description</label>
+                <textarea
+                    id="capture-description"
+                    rows="4"
+                    placeholder="Exemple : BTC en 1 jour avec RSI, cassure de résistance, volume fort."
+                ></textarea>
+            </div>
+
+            <div class="button-zone">
+                <button class="btn-dark" onclick="genererNouveauNomCapture()" type="button">
+                    Nouveau nom
+                </button>
+
+                <button class="btn-save" onclick="choisirDossierLocal()" type="button">
+                    Choisir dossier
+                </button>
+            </div>
+
+            <div id="dossier-local-info" class="status">
+                Aucun dossier local choisi.
+            </div>
+        </section>
+
+        <section class="analysis-category-box">
+            <h2>Screenshot</h2>
+
+            <p class="note">
+                Le navigateur demandera l’autorisation de capturer un écran, une fenêtre ou un onglet.
+                Choisis l’onglet qui contient le graphique.
+            </p>
+
+            <div class="button-zone">
+                <button class="btn-screen" onclick="capturerScreenshotManuel()" type="button">
+                    Capturer screenshot
+                </button>
+            </div>
+
+            <div id="apercu-screenshot-zone" class="preview-box">
+                <label>Aperçu du screenshot</label>
+                <img id="apercu-screenshot" src="" alt="Aperçu du screenshot">
+            </div>
+        </section>
+
         <h3>Configuration capturée</h3>
 
         <pre id="resultat-configuration">Aucune configuration capturée.</pre>
-
-        <div class="screenshot-preview">
-            <h3>Screenshot chargé depuis PostgreSQL</h3>
-            <img id="image-capture-postgres" alt="Screenshot de la capture PostgreSQL">
-        </div>
 
         <div id="status" class="status">
             En attente de capture.
@@ -673,6 +712,9 @@ Aucun test effectué.
 <script>
     let widgetTradingView = null;
     let configurationActuelle = null;
+    let dossierLocalHandle = null;
+    let screenshotBlobActuel = null;
+    let screenshotPreviewUrl = "";
 
     function valeurElement(id, valeurDefaut = "") {
         const element = document.getElementById(id);
@@ -699,6 +741,14 @@ Aucun test effectué.
         return Number(element.value || valeurDefaut);
     }
 
+    function definirValeur(id, valeur) {
+        const element = document.getElementById(id);
+
+        if (element && valeur !== undefined && valeur !== null) {
+            element.value = valeur;
+        }
+    }
+
     function getApiAnalyseUrl() {
         return document.getElementById("api-url").value.trim();
     }
@@ -716,10 +766,6 @@ Aucun test effectué.
         return getApiBaseUrl() + "/api/marche";
     }
 
-    function getApiCapturesUrl() {
-        return getApiBaseUrl() + "/api/captures";
-    }
-
     function afficherEtatServeur(type, message) {
         const etat = document.getElementById("etatServeur");
         etat.className = "server-status " + type;
@@ -732,6 +778,15 @@ Aucun test effectué.
 
     function afficherAnalyseIA(texte) {
         document.getElementById("resultat-analyse-ia").textContent = texte;
+    }
+
+    function afficherConfiguration(configuration) {
+        document.getElementById("resultat-configuration").textContent =
+            JSON.stringify(configuration, null, 4);
+    }
+
+    function afficherStatus(message) {
+        document.getElementById("status").textContent = message;
     }
 
     function getCategorieAnalyseBTC() {
@@ -768,6 +823,71 @@ Aucun test effectué.
         }
     }
 
+    function genererIdentifiantCourt() {
+        return Math.random().toString(36).substring(2, 8);
+    }
+
+    function genererTimestampLisible() {
+        const maintenant = new Date();
+
+        const annee = maintenant.getFullYear();
+        const mois = String(maintenant.getMonth() + 1).padStart(2, "0");
+        const jour = String(maintenant.getDate()).padStart(2, "0");
+        const heure = String(maintenant.getHours()).padStart(2, "0");
+        const minute = String(maintenant.getMinutes()).padStart(2, "0");
+        const seconde = String(maintenant.getSeconds()).padStart(2, "0");
+
+        return annee + mois + jour + "-" + heure + minute + seconde;
+    }
+
+function genererNomCaptureUnique() {
+    const actif = nettoyerNomFichier(valeurElement("asset-selector", "actif"));
+    const indicateur = nettoyerNomFichier(valeurElement("indicator-selector", "indicateur"));
+    const intervalle = nettoyerNomFichier(valeurElement("interval-selector", "intervalle"));
+    const dateHeure = genererTimestampLisible();
+
+    return actif + "-" + indicateur + "-" + intervalle + "-" + dateHeure;
+}
+    function genererNouveauNomCapture() {
+        const nom = genererNomCaptureUnique();
+        definirValeur("capture-nom", nom);
+        afficherStatus("Nouveau nom de capture généré.");
+        return nom;
+    }
+
+    function nettoyerNomFichier(valeur) {
+        return String(valeur || "capture-trading")
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .replace(/[^a-zA-Z0-9-_]/g, "-")
+            .replace(/-+/g, "-")
+            .replace(/^-|-$/g, "");
+    }
+
+    async function choisirDossierLocal() {
+        if (!window.showDirectoryPicker) {
+            alert(
+                "Ton navigateur ne supporte pas le choix de dossier local.\n\n" +
+                "Utilise Chrome ou Edge."
+            );
+            return;
+        }
+
+        try {
+            dossierLocalHandle = await window.showDirectoryPicker({
+                mode: "readwrite"
+            });
+
+            document.getElementById("dossier-local-info").textContent =
+                "Dossier local choisi. Les captures seront sauvegardées dedans.";
+
+            afficherStatus("Dossier local choisi.");
+
+        } catch (erreur) {
+            afficherStatus("Choix du dossier annulé.");
+        }
+    }
+
     function obtenirStyleTradingView() {
         const typeBougie = valeurElement("type-bougie", "bougies_japonaises");
 
@@ -789,32 +909,6 @@ Aucun test effectué.
             default:
                 return "1";
         }
-    }
-
-    function creerWidgetTradingView() {
-        const symbole = document.getElementById("asset-selector").value;
-        const intervalle = document.getElementById("interval-selector").value;
-
-        document.getElementById("tradingview_chart").innerHTML = "";
-
-        widgetTradingView = new TradingView.widget({
-            autosize: true,
-            symbol: symbole,
-            interval: intervalle,
-            timezone: "America/Toronto",
-            theme: "dark",
-            style: obtenirStyleTradingView(),
-            locale: "fr",
-            toolbar_bg: "#0f172a",
-            enable_publishing: false,
-            allow_symbol_change: true,
-            container_id: "tradingview_chart",
-            hide_side_toolbar: false,
-            details: true,
-            hotlist: true,
-            calendar: false,
-            studies: choisirEtudeTradingView()
-        });
     }
 
     function choisirEtudeTradingView() {
@@ -843,21 +937,35 @@ Aucun test effectué.
         return [];
     }
 
-    function actualiserGraphique() {
-        creerWidgetTradingView();
-        afficherStatus("Graphique actualisé.");
-    }
-
-    function ouvrirTradingView() {
+    function creerWidgetTradingView() {
         const symbole = document.getElementById("asset-selector").value;
         const intervalle = document.getElementById("interval-selector").value;
 
-        const url = "https://www.tradingview.com/chart/?symbol="
-            + encodeURIComponent(symbole)
-            + "&interval="
-            + encodeURIComponent(intervalle);
+        document.getElementById("tradingview_chart").innerHTML = "";
 
-        window.open(url, "_blank");
+        widgetTradingView = new TradingView.widget({
+            autosize: true,
+            symbol: symbole,
+            interval: intervalle,
+            timezone: "America/Toronto",
+            theme: "dark",
+            style: obtenirStyleTradingView(),
+            locale: "fr",
+            toolbar_bg: "#0f172a",
+            enable_publishing: false,
+            allow_symbol_change: true,
+            container_id: "tradingview_chart",
+            hide_side_toolbar: false,
+            details: true,
+            hotlist: true,
+            calendar: false,
+            studies: choisirEtudeTradingView()
+        });
+    }
+
+    function actualiserGraphique() {
+        creerWidgetTradingView();
+        afficherStatus("Graphique actualisé.");
     }
 
     function ouvrirServeurRender() {
@@ -918,13 +1026,6 @@ Aucun test effectué.
                 "TEST ÉCHOUÉ\n" +
                 "-----------\n" +
                 "Route testée : " + urlTest + "\n\n" +
-                "Causes possibles :\n" +
-                "- Render est en veille ;\n" +
-                "- le service Render n’est pas encore réveillé ;\n" +
-                "- la route /api/test n’existe pas dans server.js ;\n" +
-                "- le serveur Node.js a planté ;\n" +
-                "- l’adresse API est incorrecte ;\n" +
-                "- CORS bloque la requête.\n\n" +
                 "Détail technique :\n" +
                 erreur.message
             );
@@ -947,7 +1048,7 @@ Aucun test effectué.
                 cache: "no-store",
                 body: JSON.stringify({
                     test: true,
-                    message: "Test depuis analyse-configuration.html",
+                    message: "Test depuis analyse-config-ia-marche.html",
                     dateTest: new Date().toISOString()
                 })
             });
@@ -986,33 +1087,172 @@ Aucun test effectué.
                 "TEST /api/analyse ÉCHOUÉ\n" +
                 "-------------------------\n" +
                 "Route testée : " + apiUrl + "\n\n" +
-                "Vérifie :\n" +
-                "- que server.js contient bien app.post('/api/analyse', ...);\n" +
-                "- que CORS est activé ;\n" +
-                "- que Render est réveillé ;\n" +
-                "- que l’adresse API est correcte.\n\n" +
                 "Détail technique :\n" +
                 erreur.message
             );
         }
     }
 
-    function capturerConfigurationTradingView() {
+    async function capturerScreenshotDepuisNavigateur() {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
+            throw new Error("La capture d’écran n’est pas supportée par ce navigateur.");
+        }
+
+        const flux = await navigator.mediaDevices.getDisplayMedia({
+            video: true,
+            audio: false
+        });
+
+        const video = document.createElement("video");
+        video.srcObject = flux;
+        video.muted = true;
+
+        await new Promise(function(resolve) {
+            video.onloadedmetadata = function() {
+                video.play();
+                resolve();
+            };
+        });
+
+        await new Promise(function(resolve) {
+            setTimeout(resolve, 500);
+        });
+
+        const canvas = document.createElement("canvas");
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+
+        const contexte = canvas.getContext("2d");
+        contexte.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        flux.getTracks().forEach(function(track) {
+            track.stop();
+        });
+
+        return await new Promise(function(resolve, reject) {
+            canvas.toBlob(function(blob) {
+                if (!blob) {
+                    reject(new Error("Impossible de créer le screenshot."));
+                    return;
+                }
+
+                resolve(blob);
+            }, "image/png");
+        });
+    }
+
+    function afficherApercuScreenshot(blob) {
+        const zone = document.getElementById("apercu-screenshot-zone");
+        const image = document.getElementById("apercu-screenshot");
+
+        if (!zone || !image || !blob) {
+            return;
+        }
+
+        if (screenshotPreviewUrl) {
+            URL.revokeObjectURL(screenshotPreviewUrl);
+        }
+
+        screenshotPreviewUrl = URL.createObjectURL(blob);
+        image.src = screenshotPreviewUrl;
+        zone.style.display = "block";
+    }
+
+    async function capturerScreenshotManuel() {
+        try {
+            afficherStatus("Demande de capture d’écran en cours...");
+            screenshotBlobActuel = await capturerScreenshotDepuisNavigateur();
+            afficherApercuScreenshot(screenshotBlobActuel);
+            afficherStatus("Screenshot capturé.");
+            alert("Screenshot capturé.");
+        } catch (erreur) {
+            afficherStatus("Capture d’écran annulée ou impossible.");
+            alert("Capture d’écran annulée ou impossible.\n\nDétail : " + erreur.message);
+        }
+    }
+
+    async function sauvegarderJsonEtScreenshotSurDisqueLocal(configuration, screenshotBlob) {
+        if (!window.showDirectoryPicker) {
+            throw new Error("Le navigateur ne supporte pas la sauvegarde directe dans un dossier local.");
+        }
+
+        if (!dossierLocalHandle) {
+            await choisirDossierLocal();
+        }
+
+        if (!dossierLocalHandle) {
+            throw new Error("Aucun dossier local n’a été choisi.");
+        }
+
+        const nomBase = nettoyerNomFichier(configuration.nomFichier || genererNomCaptureUnique());
+
+        const nomJson = nomBase + ".json";
+        const nomImage = nomBase + ".png";
+
+        configuration.fichiersSauvegardes = {
+            dossier: "dossier_local_choisi_par_utilisateur",
+            nom: nomBase,
+            json: nomJson,
+            screenshot: screenshotBlob ? nomImage : null,
+            date: new Date().toISOString()
+        };
+
+        const jsonFinal = JSON.stringify(configuration, null, 4);
+
+        const fichierJsonHandle = await dossierLocalHandle.getFileHandle(nomJson, {
+            create: true
+        });
+
+        const fluxJson = await fichierJsonHandle.createWritable();
+        await fluxJson.write(jsonFinal);
+        await fluxJson.close();
+
+        if (screenshotBlob) {
+            const fichierImageHandle = await dossierLocalHandle.getFileHandle(nomImage, {
+                create: true
+            });
+
+            const fluxImage = await fichierImageHandle.createWritable();
+            await fluxImage.write(screenshotBlob);
+            await fluxImage.close();
+        }
+
+        return {
+            nom: nomBase,
+            json: nomJson,
+            screenshot: screenshotBlob ? nomImage : null,
+            date: new Date().toISOString()
+        };
+    }
+
+    async function capturerConfigurationTradingView(ajouterMarcheAutomatiquement = true) {
         const actifSelect = document.getElementById("asset-selector");
         const intervalleSelect = document.getElementById("interval-selector");
         const indicateurSelect = document.getElementById("indicator-selector");
 
+        let nomCapture = valeurElement("capture-nom", "").trim();
+
+        if (!nomCapture) {
+            nomCapture = genererNouveauNomCapture();
+        }
+
+        nomCapture = nettoyerNomFichier(nomCapture);
+
+        const descriptionCapture = valeurElement("capture-description", "").trim();
+
         configurationActuelle = {
             nom: "Configuration TradingView IA",
+            nomFichier: nomCapture,
+            description: descriptionCapture || "Configuration capturée automatiquement avec screenshot.",
             dateCapture: new Date().toISOString(),
 
             serveur: {
                 apiAnalyse: getApiAnalyseUrl(),
                 apiTest: getApiTestUrl(),
                 apiMarche: getApiMarcheUrl(),
-                apiCaptures: getApiCapturesUrl(),
-                hebergeur: "Render",
-                type: "Node.js"
+                hebergeur: "Render seulement pour les données de marché",
+                sauvegarde: "disque_local",
+                type: "sauvegarde_locale_disque"
             },
 
             graphique: {
@@ -1045,41 +1285,90 @@ Aucun test effectué.
             },
 
             snapshot: {
-                url: valeurElement("snapshot-url", ""),
+                screenshotLocal: screenshotBlobActuel ? "screenshot_deja_capture" : null,
+                actif: actifSelect.value,
+                actifLibelle: actifSelect.options[actifSelect.selectedIndex].text,
+                intervalle: intervalleSelect.value,
+                intervalleLibelle: intervalleSelect.options[intervalleSelect.selectedIndex].text,
+                indicateur: indicateurSelect.value,
+                indicateurLibelle: indicateurSelect.options[indicateurSelect.selectedIndex].text,
                 categorieAnalyse: getCategorieAnalyseBTC(),
                 categorieAnalyseLibelle: getLibelleCategorieAnalyseBTC(),
                 descriptionCategorieAnalyse: getDescriptionCategorieAnalyseBTC(),
-                screenshotBase64: null
+                dateSnapshot: new Date().toISOString(),
+                source: "screenshot_navigateur"
             },
 
             marche: null,
 
-            notes: valeurElement("notes-analyse", "").trim(),
-
             limites: {
-                captureCompleteTradingView: false,
-                dessinsInternesTradingView: false,
-                remarque: "La page capture les paramètres contrôlés par l’interface HTML, la catégorie d’analyse et le lien éventuel du snapshot."
+                captureCompleteTradingView: true,
+                dessinsInternesTradingView: true,
+                captureImageAutomatiqueSnapshot: true,
+                remarque: "La configuration JSON et le screenshot sont sauvegardés sur le disque local dans le dossier choisi par l’utilisateur."
             }
         };
 
         afficherConfiguration(configurationActuelle);
-        afficherStatus("Configuration et catégorie d’analyse capturées avec succès.");
-        alert("Configuration capturée avec la catégorie d’analyse.");
+        afficherStatus("Configuration JSON capturée. Ajout des données de marché...");
+
+        if (ajouterMarcheAutomatiquement) {
+            await enrichirConfigurationAvecDonneesMarche({ silencieux: true });
+        }
+
+        try {
+            if (!screenshotBlobActuel) {
+                afficherStatus("Capture du screenshot en cours. Choisis l’onglet ou la fenêtre à capturer.");
+                screenshotBlobActuel = await capturerScreenshotDepuisNavigateur();
+                afficherApercuScreenshot(screenshotBlobActuel);
+            }
+
+            afficherStatus("Sauvegarde du JSON et du screenshot sur le disque local...");
+
+            const resultatSauvegarde = await sauvegarderJsonEtScreenshotSurDisqueLocal(
+                configurationActuelle,
+                screenshotBlobActuel
+            );
+
+            localStorage.setItem("configurationTradingViewIA", JSON.stringify(configurationActuelle));
+
+            afficherConfiguration(configurationActuelle);
+
+            afficherStatus("Configuration JSON et screenshot sauvegardés sur le disque local.");
+
+            afficherInfosServeur(
+                "SAUVEGARDE LOCALE RÉUSSIE\n" +
+                "-------------------------\n" +
+                "Nom : " + resultatSauvegarde.nom + "\n" +
+                "JSON : " + resultatSauvegarde.json + "\n" +
+                "Screenshot : " + resultatSauvegarde.screenshot
+            );
+
+            afficherEtatServeur("ok", "Capture locale sauvegardée");
+
+            alert("Configuration JSON et screenshot sauvegardés sur le disque local.");
+
+        } catch (erreur) {
+            afficherStatus("Erreur lors de la capture ou de la sauvegarde locale.");
+
+            afficherEtatServeur("error", "Erreur capture locale");
+
+            afficherInfosServeur(
+                "ERREUR CAPTURE LOCALE\n" +
+                "---------------------\n" +
+                "Détail :\n" +
+                erreur.message
+            );
+
+            alert("Impossible de sauvegarder le JSON et le screenshot sur le disque local.");
+        }
     }
 
-    function afficherConfiguration(configuration) {
-        document.getElementById("resultat-configuration").textContent =
-            JSON.stringify(configuration, null, 4);
-    }
+    async function enrichirConfigurationAvecDonneesMarche(options = {}) {
+        const silencieux = options.silencieux === true;
 
-    function afficherStatus(message) {
-        document.getElementById("status").textContent = message;
-    }
-
-    async function enrichirConfigurationAvecDonneesMarche() {
         if (!configurationActuelle) {
-            capturerConfigurationTradingView();
+            await capturerConfigurationTradingView(false);
         }
 
         const actif = configurationActuelle.graphique.actif;
@@ -1142,7 +1431,9 @@ Aucun test effectué.
                 JSON.stringify(configurationActuelle.marche, null, 4)
             );
 
-            alert("Données de marché ajoutées à la configuration.");
+            if (!silencieux) {
+                alert("Données de marché ajoutées à la configuration.");
+            }
 
         } catch (erreur) {
             afficherStatus("Impossible de récupérer les données de marché.");
@@ -1152,303 +1443,19 @@ Aucun test effectué.
                 "ERREUR /api/marche\n" +
                 "-----------------\n" +
                 "Adresse : " + urlMarche + "\n\n" +
-                "Vérifie :\n" +
-                "- que Render est actif ;\n" +
-                "- que server.js contient bien app.post('/api/marche', ...) ;\n" +
-                "- que CORS est activé ;\n" +
-                "- que l’actif est reconnu par ton serveur.\n\n" +
                 "Détail technique :\n" +
                 erreur.message
             );
 
-            alert("Impossible d’ajouter les données de marché.");
+            if (!silencieux) {
+                alert("Impossible d’ajouter les données de marché.");
+            }
         }
     }
 
-    function obtenirScreenshotBase64DepuisConfiguration() {
-        if (!configurationActuelle || !configurationActuelle.snapshot) {
-            return null;
-        }
-
-        return configurationActuelle.snapshot.screenshotBase64 || null;
-    }
-
-    function genererNomCapturePostgres(configuration) {
-        const actif = nettoyerNomFichier(configuration.graphique.actif);
-        const indicateur = nettoyerNomFichier(configuration.graphique.indicateur);
-        const intervalle = nettoyerNomFichier(configuration.graphique.intervalle);
-        const timestamp = genererTimestampFichier();
-
-        return actif + "-" + indicateur + "-" + intervalle + "-" + timestamp;
-    }
-
-    async function enregistrerCapturePostgres() {
+    async function sauvegarderConfiguration() {
         if (!configurationActuelle) {
-            capturerConfigurationTradingView();
-        }
-
-        const urlCaptures = getApiCapturesUrl();
-
-        if (!urlCaptures) {
-            alert("Adresse API manquante.");
-            return;
-        }
-
-        const chargeUtile = {
-            actif: configurationActuelle.graphique.actif,
-            indicateur: configurationActuelle.graphique.indicateur,
-            intervalle: configurationActuelle.graphique.intervalle,
-            nom_fichier: genererNomCapturePostgres(configurationActuelle),
-            configuration_json: configurationActuelle,
-            screenshot_base64: obtenirScreenshotBase64DepuisConfiguration()
-        };
-
-        afficherStatus("Enregistrement de la capture dans PostgreSQL...");
-        afficherEtatServeur("warning", "Envoi vers /api/captures...");
-
-        try {
-            const reponse = await fetch(urlCaptures, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                cache: "no-store",
-                body: JSON.stringify(chargeUtile)
-            });
-
-            const texte = await reponse.text();
-            let resultat;
-
-            try {
-                resultat = JSON.parse(texte);
-            } catch (erreurJson) {
-                throw new Error("Le serveur n’a pas retourné du JSON. Réponse reçue : " + texte);
-            }
-
-            if (!reponse.ok || resultat.statut !== "ok") {
-                throw new Error("Réponse HTTP " + reponse.status + " : " + JSON.stringify(resultat));
-            }
-
-            localStorage.setItem("configurationTradingViewIA", JSON.stringify(configurationActuelle));
-
-            afficherStatus("Capture enregistrée dans PostgreSQL.");
-            afficherEtatServeur("ok", "Capture PostgreSQL enregistrée");
-            afficherInfosServeur(
-                "CAPTURE ENREGISTRÉE\n" +
-                "-------------------\n" +
-                "Route : " + urlCaptures + "\n\n" +
-                JSON.stringify(resultat, null, 4)
-            );
-
-            await chargerListeCapturesPostgres(false);
-
-            alert("Capture enregistrée dans PostgreSQL.");
-
-        } catch (erreur) {
-            afficherStatus("Erreur lors de l’enregistrement PostgreSQL.");
-            afficherEtatServeur("error", "Erreur /api/captures");
-            afficherInfosServeur(
-                "ERREUR /api/captures\n" +
-                "-------------------\n" +
-                "Adresse : " + urlCaptures + "\n\n" +
-                "Vérifie :\n" +
-                "- que Render est actif ;\n" +
-                "- que server.js contient app.post('/api/captures', ...) ;\n" +
-                "- que DATABASE_URL est bien configurée ;\n" +
-                "- que la table trading_capture existe ;\n" +
-                "- que CORS est activé.\n\n" +
-                "Détail technique :\n" +
-                erreur.message
-            );
-
-            alert("Impossible d’enregistrer la capture dans PostgreSQL.");
-        }
-    }
-
-    async function chargerListeCapturesPostgres(afficherAlerte = true) {
-        const urlCaptures = getApiCapturesUrl();
-        const select = document.getElementById("liste-captures-postgres");
-
-        if (!select) {
-            return;
-        }
-
-        afficherStatus("Chargement de la liste PostgreSQL...");
-        afficherEtatServeur("warning", "Lecture /api/captures...");
-
-        try {
-            const reponse = await fetch(urlCaptures, {
-                method: "GET",
-                cache: "no-store"
-            });
-
-            const texte = await reponse.text();
-            let resultat;
-
-            try {
-                resultat = JSON.parse(texte);
-            } catch (erreurJson) {
-                throw new Error("Le serveur n’a pas retourné du JSON. Réponse reçue : " + texte);
-            }
-
-            if (!reponse.ok || resultat.statut !== "ok") {
-                throw new Error("Réponse HTTP " + reponse.status + " : " + JSON.stringify(resultat));
-            }
-
-            select.innerHTML = '<option value="">Choisir une capture</option>';
-
-            if (!resultat.captures || resultat.captures.length === 0) {
-                select.innerHTML = '<option value="">Aucune capture enregistrée</option>';
-            } else {
-                resultat.captures.forEach(function(capture) {
-                    const option = document.createElement("option");
-                    option.value = capture.id;
-
-                    const dateCapture = capture.date_capture
-                        ? new Date(capture.date_capture).toLocaleString("fr-CA")
-                        : "date inconnue";
-
-                    option.textContent =
-                        capture.id + " - " +
-                        (capture.actif || "actif") + " - " +
-                        (capture.indicateur || "indicateur") + " - " +
-                        (capture.intervalle || "intervalle") + " - " +
-                        dateCapture;
-
-                    select.appendChild(option);
-                });
-            }
-
-            afficherStatus("Liste des captures PostgreSQL chargée.");
-            afficherEtatServeur("ok", "Captures PostgreSQL chargées");
-            afficherInfosServeur(
-                "LISTE DES CAPTURES\n" +
-                "------------------\n" +
-                "Route : " + urlCaptures + "\n" +
-                "Nombre : " + (resultat.captures ? resultat.captures.length : 0)
-            );
-
-            if (afficherAlerte) {
-                alert("Liste des captures chargée.");
-            }
-
-        } catch (erreur) {
-            afficherStatus("Impossible de charger la liste PostgreSQL.");
-            afficherEtatServeur("error", "Erreur lecture /api/captures");
-            afficherInfosServeur(
-                "ERREUR LECTURE /api/captures\n" +
-                "---------------------------\n" +
-                "Adresse : " + urlCaptures + "\n\n" +
-                "Détail technique :\n" +
-                erreur.message
-            );
-
-            if (afficherAlerte) {
-                alert("Impossible de charger la liste PostgreSQL.");
-            }
-        }
-    }
-
-    async function chargerCapturePostgresSelectionnee() {
-        const select = document.getElementById("liste-captures-postgres");
-
-        if (!select) {
-            alert("Liste des captures introuvable dans la page.");
-            return;
-        }
-
-        const idCapture = select.value;
-
-        if (!idCapture) {
-            alert("Choisir une capture dans la liste.");
-            return;
-        }
-
-        const urlCapture = getApiCapturesUrl() + "/" + encodeURIComponent(idCapture);
-
-        afficherStatus("Chargement de la capture PostgreSQL...");
-        afficherEtatServeur("warning", "Lecture capture PostgreSQL...");
-
-        try {
-            const reponse = await fetch(urlCapture, {
-                method: "GET",
-                cache: "no-store"
-            });
-
-            const texte = await reponse.text();
-            let resultat;
-
-            try {
-                resultat = JSON.parse(texte);
-            } catch (erreurJson) {
-                throw new Error("Le serveur n’a pas retourné du JSON. Réponse reçue : " + texte);
-            }
-
-            if (!reponse.ok || resultat.statut !== "ok" || !resultat.capture) {
-                throw new Error("Réponse HTTP " + reponse.status + " : " + JSON.stringify(resultat));
-            }
-
-            const capture = resultat.capture;
-            configurationActuelle = capture.configuration_json || null;
-
-            if (!configurationActuelle) {
-                throw new Error("La capture ne contient pas configuration_json.");
-            }
-
-            appliquerConfiguration(configurationActuelle);
-            afficherConfiguration(configurationActuelle);
-            afficherScreenshotPostgres(capture.screenshot_base64);
-
-            localStorage.setItem("configurationTradingViewIA", JSON.stringify(configurationActuelle));
-
-            afficherStatus("Capture PostgreSQL chargée.");
-            afficherEtatServeur("ok", "Capture PostgreSQL chargée");
-            afficherInfosServeur(
-                "CAPTURE CHARGÉE\n" +
-                "---------------\n" +
-                "Route : " + urlCapture + "\n" +
-                "ID : " + capture.id + "\n" +
-                "Actif : " + capture.actif + "\n" +
-                "Indicateur : " + capture.indicateur + "\n" +
-                "Intervalle : " + capture.intervalle
-            );
-
-            alert("Capture PostgreSQL chargée.");
-
-        } catch (erreur) {
-            afficherStatus("Impossible de charger la capture PostgreSQL.");
-            afficherEtatServeur("error", "Erreur capture PostgreSQL");
-            afficherInfosServeur(
-                "ERREUR CHARGEMENT CAPTURE\n" +
-                "--------------------------\n" +
-                "Adresse : " + urlCapture + "\n\n" +
-                "Détail technique :\n" +
-                erreur.message
-            );
-
-            alert("Impossible de charger la capture sélectionnée.");
-        }
-    }
-
-    function afficherScreenshotPostgres(screenshotBase64) {
-        const image = document.getElementById("image-capture-postgres");
-
-        if (!image) {
-            return;
-        }
-
-        if (screenshotBase64 && String(screenshotBase64).trim() !== "") {
-            image.src = screenshotBase64;
-            image.style.display = "block";
-        } else {
-            image.removeAttribute("src");
-            image.style.display = "none";
-        }
-    }
-
-    function sauvegarderConfiguration() {
-        if (!configurationActuelle) {
-            capturerConfigurationTradingView();
+            await capturerConfigurationTradingView(false);
         }
 
         localStorage.setItem("configurationTradingViewIA", JSON.stringify(configurationActuelle));
@@ -1457,7 +1464,7 @@ Aucun test effectué.
         alert("Configuration sauvegardée.");
     }
 
-    function rechargerConfigurationTradingView() {
+    async function rechargerConfigurationTradingView() {
         const data = localStorage.getItem("configurationTradingViewIA");
 
         if (!data) {
@@ -1470,9 +1477,11 @@ Aucun test effectué.
 
             appliquerConfiguration(configurationActuelle);
             afficherConfiguration(configurationActuelle);
-            afficherStatus("Configuration rechargée.");
+            afficherStatus("Configuration rechargée. Actualisation des données de marché en cours...");
 
-            alert("Configuration rechargée.");
+            await enrichirConfigurationAvecDonneesMarche({ silencieux: true });
+
+            alert("Configuration rechargée et données de marché actualisées.");
         } catch (erreur) {
             alert("Erreur : configuration sauvegardée invalide.");
         }
@@ -1493,90 +1502,24 @@ Aucun test effectué.
             actualiserDescriptionCategorie();
         }
 
-        if (configuration.risque) {
-            definirValeur("capital-input", configuration.risque.capitalInitial);
-            definirValeur("risk-input", configuration.risque.risqueParPositionPourcent);
-            definirValeur("stoploss-input", configuration.risque.stopLossPourcent);
-            definirValeur("takeprofit-input", configuration.risque.takeProfitPourcent);
-            definirValeur("levier-input", configuration.risque.levier);
-            definirValeur("sens-selector", configuration.risque.sens);
-        }
-
-        if (configuration.snapshot) {
-            definirValeur("snapshot-url", configuration.snapshot.url);
-        }
-
         if (configuration.serveur && configuration.serveur.apiAnalyse) {
             definirValeur("api-url", configuration.serveur.apiAnalyse);
         }
 
-        if (configuration.notes !== undefined) {
-            definirValeur("notes-analyse", configuration.notes);
+        if (configuration.nomFichier) {
+            definirValeur("capture-nom", configuration.nomFichier);
+        }
+
+        if (configuration.description) {
+            definirValeur("capture-description", configuration.description);
         }
 
         creerWidgetTradingView();
     }
 
-    function definirValeur(id, valeur) {
-        const element = document.getElementById(id);
-
-        if (element && valeur !== undefined && valeur !== null) {
-            element.value = valeur;
-        }
-    }
-
-    function copierConfiguration() {
+    async function exporterJSON() {
         if (!configurationActuelle) {
-            capturerConfigurationTradingView();
-        }
-
-        const texte = JSON.stringify(configurationActuelle, null, 4);
-
-        navigator.clipboard.writeText(texte)
-            .then(function () {
-                afficherStatus("Configuration copiée dans le presse-papiers.");
-                alert("JSON copié.");
-            })
-            .catch(function () {
-                alert("Impossible de copier le JSON.");
-            });
-    }
-
-    function nettoyerNomFichier(valeur) {
-        return String(valeur || "non-defini")
-            .normalize("NFD")
-            .replace(/[\u0300-\u036f]/g, "")
-            .replace(/[^a-zA-Z0-9-_]/g, "-")
-            .replace(/-+/g, "-")
-            .replace(/^-|-$/g, "");
-    }
-
-    function genererTimestampFichier() {
-        const maintenant = new Date();
-
-        const annee = maintenant.getFullYear();
-        const mois = String(maintenant.getMonth() + 1).padStart(2, "0");
-        const jour = String(maintenant.getDate()).padStart(2, "0");
-        const heure = String(maintenant.getHours()).padStart(2, "0");
-        const minute = String(maintenant.getMinutes()).padStart(2, "0");
-        const seconde = String(maintenant.getSeconds()).padStart(2, "0");
-
-        return annee + mois + jour + "-" + heure + minute + seconde;
-    }
-
-    function genererNomFichierJSON(configuration) {
-        const actif = nettoyerNomFichier(configuration.graphique.actif);
-        const indicateur = nettoyerNomFichier(configuration.graphique.indicateur);
-        const intervalle = nettoyerNomFichier(configuration.graphique.intervalle);
-        const categorie = nettoyerNomFichier(configuration.analyseIA?.categorie || "analyse");
-        const timestamp = genererTimestampFichier();
-
-        return actif + "-" + indicateur + "-" + intervalle + "-" + categorie + "-" + timestamp + ".json";
-    }
-
-    function exporterJSON() {
-        if (!configurationActuelle) {
-            capturerConfigurationTradingView();
+            await capturerConfigurationTradingView(false);
         }
 
         const contenu = JSON.stringify(configurationActuelle, null, 4);
@@ -1589,7 +1532,7 @@ Aucun test effectué.
 
         URL.revokeObjectURL(lien.href);
 
-        afficherStatus("Configuration exportée en JSON avec la catégorie d’analyse.");
+        afficherStatus("Configuration exportée en JSON.");
         alert("Fichier JSON exporté.");
     }
 
@@ -1606,7 +1549,7 @@ Aucun test effectué.
 
         const lecteur = new FileReader();
 
-        lecteur.onload = function(e) {
+        lecteur.onload = async function(e) {
             try {
                 const contenu = e.target.result;
                 const configuration = JSON.parse(contenu);
@@ -1622,8 +1565,11 @@ Aucun test effectué.
 
                 localStorage.setItem("configurationTradingViewIA", JSON.stringify(configurationActuelle));
 
-                afficherStatus("Configuration JSON importée avec sa catégorie d’analyse.");
-                alert("Configuration JSON importée avec succès.");
+                afficherStatus("Configuration JSON importée. Actualisation des données de marché en cours...");
+
+                await enrichirConfigurationAvecDonneesMarche({ silencieux: true });
+
+                alert("Configuration JSON importée et données de marché actualisées.");
 
             } catch (erreur) {
                 alert("Import impossible. Le fichier JSON est invalide.\n\nDétail : " + erreur.message);
@@ -1635,148 +1581,65 @@ Aucun test effectué.
         lecteur.readAsText(fichier);
     }
 
-    function genererAnalyseLocale(configuration) {
-        const graphique = configuration.graphique || {};
-        const risque = configuration.risque || {};
-        const snapshot = configuration.snapshot || {};
-        const analyseIA = configuration.analyseIA || {};
+    function genererNomFichierJSON(configuration) {
+        const actif = nettoyerNomFichier(configuration.graphique.actif);
+        const indicateur = nettoyerNomFichier(configuration.graphique.indicateur);
+        const intervalle = nettoyerNomFichier(configuration.graphique.intervalle);
+        const categorie = nettoyerNomFichier(configuration.analyseIA?.categorie || "analyse");
+        const nom = nettoyerNomFichier(configuration.nomFichier || genererNomCaptureUnique());
 
-        const actif = graphique.actif || "Actif non défini";
-        const intervalle = graphique.intervalleLibelle || graphique.intervalle || "Intervalle non défini";
-        const indicateur = graphique.indicateur || "Indicateur non défini";
-        const categorie = analyseIA.categorieLibelle || getLibelleCategorieAnalyseBTC();
-        const descriptionCategorie = analyseIA.descriptionCategorie || getDescriptionCategorieAnalyseBTC();
-
-        let niveauRisque = "modéré";
-        let remarqueRisque = "Le risque paraît raisonnable si le stop loss est respecté.";
-
-        if (Number(risque.risqueParPositionPourcent) > 2) {
-            niveauRisque = "élevé";
-            remarqueRisque = "Le risque par position est élevé. Réduire le risque à 1 % ou 2 % maximum serait plus prudent.";
-        }
-
-        if (Number(risque.stopLossPourcent) <= 0) {
-            niveauRisque = "très élevé";
-            remarqueRisque = "Aucun stop loss valide n’est défini. C’est une mauvaise pratique.";
-        }
-
-        const presenceSnapshot = snapshot.url && snapshot.url.trim() !== "";
-
-        return (
-            "ANALYSE IA LOCALE\n" +
-            "=================\n\n" +
-
-            "Source analysée : " + (presenceSnapshot ? "snapshot fourni ou importé" : "configuration du graphique") + "\n" +
-            "Actif : " + actif + "\n" +
-            "Intervalle : " + intervalle + "\n" +
-            "Indicateur : " + indicateur + "\n" +
-            "Catégorie choisie : " + categorie + "\n" +
-            "Description : " + descriptionCategorie + "\n" +
-            "Snapshot : " + (presenceSnapshot ? snapshot.url : "aucun lien de snapshot disponible") + "\n\n" +
-
-            "LECTURE TECHNIQUE\n" +
-            "-----------------\n" +
-            "- L’analyse tient compte de la catégorie sélectionnée.\n" +
-            "- Les résultats restent basés sur les paramètres capturés, pas sur une lecture complète des pixels du graphique.\n" +
-            "- Confirmer les signaux avec le volume, les supports, les résistances et les zones de liquidité.\n\n" +
-
-            "GESTION DU RISQUE\n" +
-            "-----------------\n" +
-            "Capital : " + (risque.capitalInitial ?? 1000) + "\n" +
-            "Risque par position : " + (risque.risqueParPositionPourcent ?? 1) + " %\n" +
-            "Stop loss : " + (risque.stopLossPourcent ?? 2) + " %\n" +
-            "Take profit : " + (risque.takeProfitPourcent ?? 4) + " %\n" +
-            "Levier : " + (risque.levier ?? 1) + "\n" +
-            "Niveau de risque estimé : " + niveauRisque + "\n" +
-            remarqueRisque + "\n\n" +
-
-            "RECOMMANDATIONS\n" +
-            "---------------\n" +
-            "1. Interpréter le graphique selon la catégorie choisie : " + categorie + ".\n" +
-            "2. Ne pas entrer en position uniquement sur un seul indicateur.\n" +
-            "3. Vérifier si le prix est proche d’un support ou d’une résistance importante.\n" +
-            "4. Vérifier la liquidité, le volume et les mèches avant toute décision.\n" +
-            "5. Utiliser un ratio gain/perte minimal de 1:2 si possible.\n\n" +
-
-            "AVERTISSEMENT\n" +
-            "-------------\n" +
-            "Cette analyse est pédagogique. Ce n’est pas un conseil financier."
-        );
+        return nom + "-" + actif + "-" + indicateur + "-" + intervalle + "-" + categorie + ".json";
     }
 
-    async function analyserSnapshotIA() {
+    async function ouvrirPageDecision() {
+        afficherStatus("Capture de la configuration courante avant ouverture de la page décisions...");
+
         if (!configurationActuelle) {
-            capturerConfigurationTradingView();
-        }
+            const actifSelect = document.getElementById("asset-selector");
+            const intervalleSelect = document.getElementById("interval-selector");
+            const indicateurSelect = document.getElementById("indicator-selector");
 
-        afficherAnalyseIA("Analyse IA en cours...");
+            const nomCapture = nettoyerNomFichier(valeurElement("capture-nom", genererNomCaptureUnique()));
 
-        const apiUrl = getApiAnalyseUrl();
+            configurationActuelle = {
+                nom: "Configuration TradingView IA",
+                nomFichier: nomCapture,
+                description: valeurElement("capture-description", ""),
+                dateCapture: new Date().toISOString(),
 
-        const chargeUtile = {
-            action: "analyse_snapshot_ou_configuration",
-            demande: "Analyser le snapshot capturé ou chargé selon la catégorie choisie, puis produire des recommandations.",
-            categorieAnalyse: getCategorieAnalyseBTC(),
-            categorieAnalyseLibelle: getLibelleCategorieAnalyseBTC(),
-            descriptionCategorieAnalyse: getDescriptionCategorieAnalyseBTC(),
-            configuration: configurationActuelle
-        };
-
-        try {
-            const reponse = await fetch(apiUrl, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
+                serveur: {
+                    apiAnalyse: getApiAnalyseUrl(),
+                    apiTest: getApiTestUrl(),
+                    apiMarche: getApiMarcheUrl(),
+                    hebergeur: "Render seulement pour données de marché",
+                    sauvegarde: "disque_local"
                 },
-                body: JSON.stringify(chargeUtile)
-            });
 
-            const texte = await reponse.text();
+                graphique: {
+                    actif: actifSelect.value,
+                    actifLibelle: actifSelect.options[actifSelect.selectedIndex].text,
+                    intervalle: intervalleSelect.value,
+                    intervalleLibelle: intervalleSelect.options[intervalleSelect.selectedIndex].text,
+                    indicateur: indicateurSelect.value,
+                    indicateurLibelle: indicateurSelect.options[indicateurSelect.selectedIndex].text,
+                    source: "widget_tradingview_integre"
+                },
 
-            let resultat;
+                analyseIA: {
+                    categorie: getCategorieAnalyseBTC(),
+                    categorieLibelle: getLibelleCategorieAnalyseBTC(),
+                    descriptionCategorie: getDescriptionCategorieAnalyseBTC()
+                },
 
-            try {
-                resultat = JSON.parse(texte);
-            } catch (erreurJson) {
-                throw new Error("Le serveur n’a pas retourné du JSON.\n\nRéponse reçue :\n" + texte);
-            }
-
-            if (!reponse.ok) {
-                throw new Error("Réponse serveur incorrecte : " + reponse.status);
-            }
-
-            afficherAnalyseIA(
-                "ANALYSE IA REÇUE DU SERVEUR\n" +
-                "===========================\n\n" +
-                JSON.stringify(resultat, null, 4)
-            );
-
-            afficherEtatServeur("ok", "Analyse IA terminée");
-            afficherStatus("Analyse IA terminée.");
-            alert("Analyse IA terminée.");
-
-        } catch (erreur) {
-            const analyseLocale = genererAnalyseLocale(configurationActuelle);
-
-            afficherAnalyseIA(
-                analyseLocale +
-                "\n\n" +
-                "NOTE TECHNIQUE\n" +
-                "--------------\n" +
-                "Le serveur Render n’a pas répondu correctement. Une analyse locale simplifiée a donc été affichée.\n\n" +
-                "Détail technique :\n" +
-                erreur.message
-            );
-
-            afficherEtatServeur("warning", "Analyse locale affichée");
-            afficherStatus("Analyse IA locale affichée.");
+                marche: null
+            };
         }
-    }
 
-    function ouvrirPageDecision() {
-        if (!configurationActuelle) {
-            capturerConfigurationTradingView();
-        }
+        afficherStatus("Actualisation des données de marché avant ouverture de la page décisions...");
+
+        await enrichirConfigurationAvecDonneesMarche({
+            silencieux: true
+        });
 
         localStorage.setItem("configurationTradingViewIA", JSON.stringify(configurationActuelle));
 
@@ -1789,93 +1652,32 @@ Aucun test effectué.
         }
 
         configurationActuelle = null;
+        screenshotBlobActuel = null;
+
+        if (screenshotPreviewUrl) {
+            URL.revokeObjectURL(screenshotPreviewUrl);
+            screenshotPreviewUrl = "";
+        }
 
         document.getElementById("resultat-configuration").textContent =
             "Aucune configuration capturée.";
 
-        afficherAnalyseIA("Aucune analyse IA lancée.");
+        const zone = document.getElementById("apercu-screenshot-zone");
+        const image = document.getElementById("apercu-screenshot");
 
+        if (zone && image) {
+            image.src = "";
+            zone.style.display = "none";
+        }
+
+        afficherAnalyseIA("Aucune analyse IA lancée.");
         afficherStatus("Configuration effacée.");
         alert("Configuration effacée.");
     }
 
-    async function envoyerVersAPI() {
-        if (!configurationActuelle) {
-            capturerConfigurationTradingView();
-        }
-
-        const apiUrl = getApiAnalyseUrl();
-
-        if (!apiUrl) {
-            alert("Adresse API manquante.");
-            return;
-        }
-
-        try {
-            afficherStatus("Envoi vers l’API IA...");
-            afficherEtatServeur("warning", "Envoi vers l’API IA...");
-
-            const reponse = await fetch(apiUrl, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(configurationActuelle)
-            });
-
-            const texte = await reponse.text();
-
-            let resultat;
-
-            try {
-                resultat = JSON.parse(texte);
-            } catch (erreurJson) {
-                throw new Error("Le serveur n’a pas retourné du JSON.\n\nRéponse reçue :\n" + texte);
-            }
-
-            if (!reponse.ok) {
-                throw new Error("Réponse serveur incorrecte : " + reponse.status);
-            }
-
-            const sortie = {
-                configurationEnvoyee: configurationActuelle,
-                resultatIA: resultat
-            };
-
-            document.getElementById("resultat-configuration").textContent =
-                JSON.stringify(sortie, null, 4);
-
-            afficherStatus("Réponse IA reçue.");
-            afficherEtatServeur("ok", "Analyse IA reçue");
-            afficherInfosServeur("Analyse IA reçue avec succès depuis :\n" + apiUrl);
-
-            alert("Analyse IA reçue.");
-
-        } catch (erreur) {
-            afficherStatus("Erreur lors de l’appel API.");
-            afficherEtatServeur("error", "Erreur API");
-
-            afficherInfosServeur(
-                "ERREUR LORS DE L’ENVOI À L’API\n" +
-                "-------------------------------\n" +
-                "Adresse : " + apiUrl + "\n\n" +
-                "Causes possibles :\n" +
-                "- serveur Render en veille ;\n" +
-                "- serveur Node.js arrêté ;\n" +
-                "- adresse API incorrecte ;\n" +
-                "- route /api/analyse absente ;\n" +
-                "- CORS non activé ;\n" +
-                "- réponse non JSON.\n\n" +
-                "Détail technique :\n" +
-                erreur.message
-            );
-
-            alert("Impossible d’envoyer la configuration à l’API.");
-        }
-    }
-
     document.addEventListener("DOMContentLoaded", function () {
         creerWidgetTradingView();
+        genererNouveauNomCapture();
 
         const selectCategorie = document.getElementById("categorie-analyse-btc");
 
@@ -1888,20 +1690,12 @@ Aucun test effectué.
                     configurationActuelle.analyseIA.categorieLibelle = getLibelleCategorieAnalyseBTC();
                     configurationActuelle.analyseIA.descriptionCategorie = getDescriptionCategorieAnalyseBTC();
 
-                    if (configurationActuelle.snapshot) {
-                        configurationActuelle.snapshot.categorieAnalyse = getCategorieAnalyseBTC();
-                        configurationActuelle.snapshot.categorieAnalyseLibelle = getLibelleCategorieAnalyseBTC();
-                        configurationActuelle.snapshot.descriptionCategorieAnalyse = getDescriptionCategorieAnalyseBTC();
-                    }
-
                     afficherConfiguration(configurationActuelle);
                 }
             });
 
             actualiserDescriptionCategorie();
         }
-
-        chargerListeCapturesPostgres(false);
     });
 </script>
 
