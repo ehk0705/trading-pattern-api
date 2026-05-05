@@ -50,6 +50,8 @@ app.get("/", (req, res) => {
         message: "Serveur Trading API actif.",
         routes: [
             "GET /api/test",
+            "GET /api/verifier-table",
+            "GET /api/verifier-captures",
             "POST /api/analyse",
             "POST /api/marche",
             "POST /api/analyse-pattern",
@@ -72,6 +74,83 @@ app.get("/api/test", (req, res) => {
         serveur: "trading-pattern-api",
         date: new Date().toISOString()
     });
+});
+
+/*
+    Vérification de l'existence de la table trading_capture
+*/
+app.get("/api/verifier-table", async (req, res) => {
+    try {
+        if (!process.env.DATABASE_URL) {
+            return res.status(500).json({
+                ok: false,
+                statut: "erreur",
+                message: "DATABASE_URL n'est pas configurée sur Render."
+            });
+        }
+
+        const resultat = await pool.query(`
+            SELECT table_name
+            FROM information_schema.tables
+            WHERE table_schema = 'public'
+            AND table_name = 'trading_capture';
+        `);
+
+        const tableExiste = resultat.rows.length > 0;
+
+        res.json({
+            ok: true,
+            statut: "ok",
+            table: "trading_capture",
+            tableExiste: tableExiste,
+            message: tableExiste
+                ? "La table trading_capture existe bien."
+                : "La table trading_capture n'existe pas."
+        });
+
+    } catch (erreur) {
+        res.status(500).json({
+            ok: false,
+            statut: "erreur",
+            message: "Erreur lors de la vérification de la table.",
+            detail: erreur.message
+        });
+    }
+});
+
+/*
+    Vérification du nombre de captures enregistrées
+*/
+app.get("/api/verifier-captures", async (req, res) => {
+    try {
+        if (!process.env.DATABASE_URL) {
+            return res.status(500).json({
+                ok: false,
+                statut: "erreur",
+                message: "DATABASE_URL n'est pas configurée sur Render."
+            });
+        }
+
+        const resultat = await pool.query(`
+            SELECT COUNT(*) AS total
+            FROM trading_capture;
+        `);
+
+        res.json({
+            ok: true,
+            statut: "ok",
+            table: "trading_capture",
+            totalCaptures: Number(resultat.rows[0].total)
+        });
+
+    } catch (erreur) {
+        res.status(500).json({
+            ok: false,
+            statut: "erreur",
+            message: "Impossible de lire la table trading_capture.",
+            detail: erreur.message
+        });
+    }
 });
 
 /*
@@ -1175,25 +1254,15 @@ function arrondir(nombre) {
 }
 
 /*
-    Route introuvable
+    Initialisation automatique de la base PostgreSQL
 */
-app.use((req, res) => {
-    res.status(404).json({
-        statut: "erreur",
-        message: "Route introuvable.",
-        routeDemandee: req.originalUrl
-    });
-});
-
-/*
-    Démarrage serveur
-*/
-app.listen(PORT, () => {
-    console.log("Serveur lancé sur le port " + PORT);
-});
-
 async function initialiserBase() {
     try {
+        if (!process.env.DATABASE_URL) {
+            console.warn("DATABASE_URL absente. La table trading_capture ne peut pas être créée.");
+            return;
+        }
+
         await pool.query(`
             CREATE TABLE IF NOT EXISTS trading_capture (
                 id SERIAL PRIMARY KEY,
@@ -1213,4 +1282,21 @@ async function initialiserBase() {
     }
 }
 
-initialiserBase();
+/*
+    Route introuvable
+*/
+app.use((req, res) => {
+    res.status(404).json({
+        statut: "erreur",
+        message: "Route introuvable.",
+        routeDemandee: req.originalUrl
+    });
+});
+
+/*
+    Démarrage serveur
+*/
+app.listen(PORT, async () => {
+    console.log("Serveur lancé sur le port " + PORT);
+    await initialiserBase();
+});
